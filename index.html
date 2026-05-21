@@ -368,6 +368,149 @@
             setTimeout(() => { notif.classList.add('translate-y-[150%]'); }, 5000);
         }
 
+        function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        resolve(json);
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                reader.onerror = (err) => reject(err);
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        async function processData() {
+            const file1 = document.getElementById('file1').files[0];
+            const file2 = document.getElementById('file2').files[0];
+
+            if (!file1 || !file2) {
+                showNotification("Peringatan", "Harap unggah kedua file (Data 1 & Data 2) terlebih dahulu.", true);
+                return;
+            }
+
+            const btn = document.getElementById('processBtn');
+            const icon = document.getElementById('processIcon');
+            const text = document.getElementById('processText');
+
+            btn.disabled = true;
+            icon.classList.remove('ph-magic-wand');
+            icon.classList.add('ph-spinner-gap', 'animate-spin');
+            text.textContent = "Memproses Data...";
+
+            try {
+                const data1Raw = await readFile(file1);
+                const data2Raw = await readFile(file2);
+
+                // Parse Data 1: Mulai baris 7 (index 6). SKU: Kol E(4) & F(5). Stok: Kol I(8).
+                let mapData1 = new Map();
+                for (let i = 6; i < data1Raw.length; i++) {
+                    let row = data1Raw[i];
+                    if (!row || row.length === 0) continue;
+                    let skuE = (row[4] || "").toString().trim();
+                    let skuF = (row[5] || "").toString().trim();
+                    let sku = skuE + (skuF ? " " + skuF : "");
+                    if (!sku) continue;
+
+                    let stock = parseFloat(row[8]);
+                    if (isNaN(stock)) stock = 0;
+
+                    mapData1.set(sku, stock);
+                }
+
+                // Parse Data 2: Mulai baris 2 (index 1). SKU: Kol A(0). Stok: Kol M(12). Nama: Kol 3(2), Ktg: Kol 5(4), Mrk: Kol 7(6)
+                let mapData2 = new Map();
+                for (let i = 1; i < data2Raw.length; i++) {
+                    let row = data2Raw[i];
+                    if (!row || row.length === 0) continue;
+                    let sku = (row[0] || "").toString().trim();
+                    if (!sku) continue;
+
+                    let stock = parseFloat(row[12]);
+                    if (isNaN(stock)) stock = 0;
+                    
+                    let name = (row[2] || "-").toString().trim();
+                    let category = (row[4] || "-").toString().trim();
+                    let brand = (row[6] || "-").toString().trim();
+
+                    mapData2.set(sku, { stock: stock, name: name, category: category, brand: brand });
+                }
+
+                comparisonResults = { mismatch: [], match: [], only1: [], only2: [] };
+
+                // Compare Data 1 to Data 2
+                mapData1.forEach((stock1, sku) => {
+                    if (mapData2.has(sku)) {
+                        let data2 = mapData2.get(sku);
+                        let stock2 = data2.stock;
+                        let diff = stock1 - stock2;
+                        let item = {
+                            sku: sku,
+                            productName: data2.name,
+                            stock1: stock1,
+                            stock2: stock2,
+                            diff: diff
+                        };
+                        if (diff !== 0) {
+                            comparisonResults.mismatch.push(item);
+                        } else {
+                            comparisonResults.match.push(item);
+                        }
+                        mapData2.delete(sku); 
+                    } else {
+                        comparisonResults.only1.push({
+                            sku: sku,
+                            productName: "-",
+                            stock1: stock1,
+                            stock2: "-",
+                            diff: null
+                        });
+                    }
+                });
+
+                // Remaining in mapData2
+                mapData2.forEach((data2, sku) => {
+                    comparisonResults.only2.push({
+                        sku: sku,
+                        productName: data2.name,
+                        stock1: "-",
+                        stock2: data2.stock,
+                        diff: null,
+                        category: data2.category,
+                        brand: data2.brand,
+                        isUploaded: false
+                    });
+                });
+
+                // Update UI counts
+                document.getElementById('countMismatch').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.mismatch.length);
+                document.getElementById('countMatch').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.match.length);
+                document.getElementById('countOnly1').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.only1.length);
+                document.getElementById('countOnly2').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.only2.length);
+
+                populateOnly2Dropdowns();
+                resetAllSearchAndFilters(); 
+                showNotification("Berhasil", "Analisis komparasi selesai dilakukan.");
+
+            } catch (error) {
+                console.error("Processing Error:", error);
+                showNotification("Terjadi Kesalahan", "Gagal memproses file. Pastikan format file benar.", true);
+            } finally {
+                btn.disabled = false;
+                icon.classList.remove('animate-spin');
+                icon.classList.replace('ph-spinner-gap', 'ph-magic-wand');
+                text.textContent = "Mulai Analisis Komparasi";
+            }
+        }
+
         function resetAllSearchAndFilters() {
             try {
                 document.getElementById('globalSearch').value = '';
@@ -380,17 +523,8 @@
                 document.getElementById('resultsSection').classList.add('animate-slide-up');
                 
                 renderTable(currentActiveTab);
-                showNotification("Berhasil", "Analisis komparasi selesai dilakukan.");
-
             } catch (error) {
-                console.error("Processing Error:", error);
-                showNotification("Terjadi Kesalahan", "Gagal memproses file. Pastikan format file benar.", true);
-            } finally {
-                // Kembalikan kondisi tombol ke semula
-                btn.disabled = false;
-                icon.classList.remove('animate-spin');
-                icon.classList.replace('ph-spinner-gap', 'ph-magic-wand');
-                text.textContent = "Mulai Analisis Komparasi";
+                console.error("Reset Error:", error);
             }
         }
 

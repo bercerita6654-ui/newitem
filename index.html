@@ -292,6 +292,25 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Pagination Controls -->
+                <div id="paginationControls" class="hidden border-t border-slate-100 bg-slate-50/50 p-4 flex-col sm:flex-row items-center justify-between gap-4 rounded-b-2xl relative z-10 transition-all">
+                    <div class="text-sm text-slate-600 font-medium" id="paginationInfo">
+                        Menampilkan <span class="font-bold text-slate-900" id="pageStart">0</span> - <span class="font-bold text-slate-900" id="pageEnd">0</span> dari <span class="font-bold text-slate-900" id="pageTotal">0</span> data
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="changePage(-1)" id="btnPrevPage" class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-bold text-slate-600 bg-white hover:bg-slate-50 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center gap-1 active:scale-95 disabled:active:scale-100">
+                            <i class="ph ph-caret-left text-lg"></i> <span class="hidden sm:inline">Sebelumnya</span>
+                        </button>
+                        <div class="px-4 py-2 rounded-lg bg-blue-50 text-blue-700 font-bold text-sm border border-blue-100 shadow-inner">
+                            Hal <span id="currentPageDisplay">1</span> / <span id="totalPagesDisplay">1</span>
+                        </div>
+                        <button onclick="changePage(1)" id="btnNextPage" class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-bold text-slate-600 bg-white hover:bg-slate-50 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center gap-1 active:scale-95 disabled:active:scale-100">
+                            <span class="hidden sm:inline">Selanjutnya</span> <i class="ph ph-caret-right text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </main>
@@ -316,6 +335,16 @@
         let activeFilters = { min1: null, max1: null, min2: null, max2: null };
         let globalSearchQuery = '';
         let only2Filters = { category: '', brand: '', sort: '' };
+        
+        let currentPage = 1;
+        const itemsPerPage = 100;
+
+        function changePage(direction) {
+            currentPage += direction;
+            renderTable(currentActiveTab);
+            // Auto scroll perlahan ke atas tabel saat pindah halaman
+            document.querySelector('.overflow-x-auto').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
 
         function showNotification(title, message, isError = false) {
             const notif = document.getElementById('notification');
@@ -343,6 +372,7 @@
             try {
                 document.getElementById('globalSearch').value = '';
                 globalSearchQuery = '';
+                currentPage = 1;
                 resetFilters(false);
                 resetOnly2Filters(false);
                 renderTable(currentActiveTab);
@@ -489,6 +519,7 @@
                 
                 document.getElementById('globalSearch').value = '';
                 globalSearchQuery = '';
+                currentPage = 1;
                 resetFilters(false);
                 resetOnly2Filters(false);
 
@@ -515,6 +546,7 @@
         function switchTab(tabName) {
             try {
                 currentActiveTab = tabName;
+                currentPage = 1;
                 
                 document.querySelectorAll('.tab-btn').forEach(btn => {
                     btn.classList.remove('tab-active');
@@ -533,6 +565,7 @@
         function handleSearch() {
             try {
                 globalSearchQuery = document.getElementById('globalSearch').value.toLowerCase().trim();
+                currentPage = 1;
                 renderTable(currentActiveTab);
             } catch(e) { console.error(e); }
         }
@@ -550,6 +583,7 @@
                     min2: min2 !== '' ? parseFloat(min2) : null,
                     max2: max2 !== '' ? parseFloat(max2) : null,
                 };
+                currentPage = 1;
                 renderTable(currentActiveTab);
             } catch(e) { console.error(e); }
         }
@@ -562,6 +596,7 @@
                 document.getElementById('maxData2').value = '';
                 
                 activeFilters = { min1: null, max1: null, min2: null, max2: null };
+                currentPage = 1;
                 if(shouldRender) renderTable(currentActiveTab);
             } catch(e) { console.error(e); }
         }
@@ -607,6 +642,7 @@
                 only2Filters.category = document.getElementById('filterCategory').value || '';
                 only2Filters.brand = document.getElementById('filterBrand').value || '';
                 only2Filters.sort = document.getElementById('sortStockOnly2').value || '';
+                currentPage = 1;
                 renderTable(currentActiveTab);
             } catch(e) { console.error(e); }
         }
@@ -617,6 +653,7 @@
                 document.getElementById('filterBrand').value = '';
                 document.getElementById('sortStockOnly2').value = '';
                 only2Filters = { category: '', brand: '', sort: '' };
+                currentPage = 1;
                 if(shouldRender) renderTable(currentActiveTab);
             } catch(e) { console.error(e); }
         }
@@ -680,11 +717,23 @@
                     if(filterSectionOnly2) { filterSectionOnly2.classList.remove('flex'); filterSectionOnly2.classList.add('hidden'); }
                 }
 
+                // Pagination Math
+                const totalItems = data.length;
+                const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+                if (currentPage > totalPages) currentPage = totalPages;
+                if (currentPage < 1) currentPage = 1;
+                
+                const paginationControls = document.getElementById('paginationControls');
+
                 // Empty State Handler
-                if (data.length === 0) {
+                if (totalItems === 0) {
                     if(emptyState) {
                         emptyState.classList.remove('hidden');
                         emptyState.classList.add('flex');
+                    }
+                    if (paginationControls) {
+                        paginationControls.classList.add('hidden');
+                        paginationControls.classList.remove('flex');
                     }
                     return;
                 } else {
@@ -692,12 +741,31 @@
                         emptyState.classList.add('hidden');
                         emptyState.classList.remove('flex');
                     }
+                    if (paginationControls) {
+                        paginationControls.classList.remove('hidden');
+                        paginationControls.classList.add('flex');
+                    }
                 }
+
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+                const paginatedData = data.slice(startIndex, endIndex);
 
                 const formatNum = (num) => new Intl.NumberFormat('id-ID').format(num);
 
-                // Row Render
-                data.forEach((item, index) => {
+                // Update Pagination UI Elements
+                if (document.getElementById('pageStart')) {
+                    document.getElementById('pageStart').textContent = formatNum(startIndex + 1);
+                    document.getElementById('pageEnd').textContent = formatNum(endIndex);
+                    document.getElementById('pageTotal').textContent = formatNum(totalItems);
+                    document.getElementById('currentPageDisplay').textContent = formatNum(currentPage);
+                    document.getElementById('totalPagesDisplay').textContent = formatNum(totalPages);
+                    document.getElementById('btnPrevPage').disabled = currentPage === 1;
+                    document.getElementById('btnNextPage').disabled = currentPage === totalPages;
+                }
+
+                // Row Render using paginatedData
+                paginatedData.forEach((item, index) => {
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-blue-50/60 transition-colors border-b border-slate-100 last:border-0 group cursor-default';
                     tr.style.animation = `slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.015}s forwards`;

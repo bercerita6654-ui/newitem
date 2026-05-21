@@ -374,172 +374,41 @@
                 globalSearchQuery = '';
                 currentPage = 1;
                 resetFilters(false);
-                resetOnly2Filters(false);
+                
+                // Tampilkan bagian hasil setelah sukses dianalisis
+                document.getElementById('resultsSection').classList.remove('hidden', 'opacity-0');
+                document.getElementById('resultsSection').classList.add('animate-slide-up');
+                
                 renderTable(currentActiveTab);
-            } catch (e) { console.error(e); }
-        }
-
-        function readFileAsData(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        const firstSheetName = workbook.SheetNames[0];
-                        const worksheet = workbook.Sheets[firstSheetName];
-                        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
-                        resolve(json);
-                    } catch (error) {
-                        reject(error);
-                    }
-                };
-                reader.onerror = (error) => reject(error);
-                reader.readAsArrayBuffer(file);
-            });
-        }
-
-        async function processData() {
-            const file1 = document.getElementById('file1').files[0];
-            const file2 = document.getElementById('file2').files[0];
-
-            if (!file1 || !file2) {
-                showNotification("Aksi Diperlukan", "Mohon unggah kedua file (Data 1 dan Data 2) terlebih dahulu.", true);
-                return;
-            }
-
-            const btn = document.getElementById('processBtn');
-            const icon = document.getElementById('processIcon');
-            const text = document.getElementById('processText');
-            
-            btn.disabled = true;
-            icon.classList.add('animate-spin');
-            icon.classList.replace('ph-magic-wand', 'ph-spinner-gap');
-            text.textContent = "Sedang Menganalisis...";
-
-            try {
-                const data1Raw = await readFileAsData(file1);
-                const data2Raw = await readFileAsData(file2);
-
-                const mapData1 = new Map();
-                const mapData2 = new Map();
-
-                // Parsing Data 1 (Baris 7, SKU Kol E(4) & F(5), Stok Kol I(8))
-                for (let i = 6; i < data1Raw.length; i++) {
-                    const row = data1Raw[i];
-                    if (!row || row.length === 0) continue;
-
-                    let val4 = row[4] !== undefined && row[4] !== null ? String(row[4]).trim() : "";
-                    let val5 = row[5] !== undefined && row[5] !== null ? String(row[5]).trim() : "";
-                    
-                    let sku = val4;
-                    if (val5 !== "" && val5 !== val4) {
-                        sku = sku !== "" ? sku + " " + val5 : val5;
-                    }
-                    sku = sku.trim();
-                    if (sku === "") continue;
-
-                    let stockStr = row[8] !== undefined && row[8] !== null ? String(row[8]) : "0";
-                    stockStr = stockStr.replace(/,/g, '').replace(/\./g, '').trim(); 
-                    let stock = parseFloat(stockStr);
-                    if (isNaN(stock)) stock = 0;
-
-                    if (mapData1.has(sku)) {
-                        mapData1.set(sku, mapData1.get(sku) + stock);
-                    } else {
-                        mapData1.set(sku, stock);
-                    }
-                }
-
-                // Parsing Data 2 (Baris 2, SKU Kol A(0), Stok Kol M(12), Nama Kol 3(2), Ktg Kol 5(4), Mrk Kol 7(6))
-                for (let i = 1; i < data2Raw.length; i++) {
-                    const row = data2Raw[i];
-                    if (!row || row.length === 0) continue;
-
-                    let sku = row[0] !== undefined && row[0] !== null ? String(row[0]).trim() : "";
-                    if (sku === "") continue;
-
-                    let productName = row[2] !== undefined && row[2] !== null && String(row[2]).trim() !== "" ? String(row[2]).trim() : "-";
-                    let category = row[4] !== undefined && row[4] !== null && String(row[4]).trim() !== "" ? String(row[4]).trim() : "-";
-                    let brand = row[6] !== undefined && row[6] !== null && String(row[6]).trim() !== "" ? String(row[6]).trim() : "-";
-
-                    let stockStr = row[12] !== undefined && row[12] !== null ? String(row[12]) : "0";
-                    stockStr = stockStr.replace(/,/g, '').replace(/\./g, '').trim();
-                    let stock = parseFloat(stockStr);
-                    if (isNaN(stock)) stock = 0;
-
-                    if (mapData2.has(sku)) {
-                        let existing = mapData2.get(sku);
-                        existing.stock += stock;
-                        mapData2.set(sku, existing);
-                    } else {
-                        mapData2.set(sku, { stock: stock, name: productName, category: category, brand: brand });
-                    }
-                }
-
-                comparisonResults = { mismatch: [], match: [], only1: [], only2: [] };
-                const allSkus = new Set([...mapData1.keys(), ...mapData2.keys()]);
-
-                allSkus.forEach(sku => {
-                    const inData1 = mapData1.has(sku);
-                    const inData2 = mapData2.has(sku);
-                    
-                    const stock1 = inData1 ? mapData1.get(sku) : 0;
-                    const data2Info = inData2 ? mapData2.get(sku) : { stock: 0, name: '-', category: '-', brand: '-' };
-                    
-                    const stock2 = data2Info.stock;
-                    const productName = data2Info.name;
-                    const category = data2Info.category;
-                    const brand = data2Info.brand;
-                    
-                    const diff = stock1 - stock2;
-                    const item = { sku, productName, stock1, stock2, diff, category, brand };
-
-                    if (inData1 && inData2) {
-                        if (diff !== 0) comparisonResults.mismatch.push(item);
-                        else comparisonResults.match.push(item);
-                    } else if (inData1 && !inData2) {
-                        comparisonResults.only1.push(item);
-                    } else if (!inData1 && inData2) {
-                        comparisonResults.only2.push(item); 
-                    }
-                });
-
-                const formatCounter = (id, num) => {
-                    const el = document.getElementById(id);
-                    if(el) el.textContent = new Intl.NumberFormat('id-ID').format(num);
-                };
-                
-                formatCounter('countMismatch', comparisonResults.mismatch.length);
-                formatCounter('countMatch', comparisonResults.match.length);
-                formatCounter('countOnly1', comparisonResults.only1.length);
-                formatCounter('countOnly2', comparisonResults.only2.length);
-
-                populateOnly2Dropdowns();
-                
-                document.getElementById('globalSearch').value = '';
-                globalSearchQuery = '';
-                currentPage = 1;
-                resetFilters(false);
-                resetOnly2Filters(false);
-
-                const resultsSec = document.getElementById('resultsSection');
-                if(resultsSec) {
-                    resultsSec.classList.remove('hidden', 'opacity-0');
-                    resultsSec.classList.add('animate-slide-up');
-                }
-                
-                switchTab('mismatch'); 
-                showNotification("Berhasil", "Data berhasil diproses dan dikomparasi dengan sukses.");
+                showNotification("Berhasil", "Analisis komparasi selesai dilakukan.");
 
             } catch (error) {
-                console.error("Proses Data Error:", error);
-                showNotification("Gagal Membaca Data", "Pastikan format file (Excel/CSV) benar dan tidak rusak.", true);
+                console.error("Processing Error:", error);
+                showNotification("Terjadi Kesalahan", "Gagal memproses file. Pastikan format file benar.", true);
             } finally {
+                // Kembalikan kondisi tombol ke semula
                 btn.disabled = false;
                 icon.classList.remove('animate-spin');
                 icon.classList.replace('ph-spinner-gap', 'ph-magic-wand');
                 text.textContent = "Mulai Analisis Komparasi";
+            }
+        }
+
+        function copySku(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showNotification("Berhasil Disalin", `Kode SKU ${text} tersalin ke clipboard.`);
+        }
+
+        function toggleUploadStatus(sku) {
+            const targetIndex = comparisonResults.only2.findIndex(item => item.sku === sku);
+            if (targetIndex !== -1) {
+                comparisonResults.only2[targetIndex].isUploaded = !comparisonResults.only2[targetIndex].isUploaded;
+                renderTable(currentActiveTab);
             }
         }
 
@@ -779,7 +648,11 @@
                     } else if (tabName === 'only1') {
                         statusBadge = `<span class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Data 1 Saja</span>`;
                     } else if (tabName === 'only2') {
-                        statusBadge = `<span class="inline-flex items-center gap-1.5 bg-purple-50 border border-purple-300 text-purple-700 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></span> Belum Terupload</span>`;
+                        if (item.isUploaded) {
+                            statusBadge = `<button onclick="toggleUploadStatus('${item.sku.replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1.5 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-700 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all active:scale-95 cursor-pointer group/btn" title="Klik untuk membatalkan"><span class="w-1.5 h-1.5 rounded-full bg-teal-500 group-hover/btn:scale-125 transition-transform"></span> Sudah Upload</button>`;
+                        } else {
+                            statusBadge = `<button onclick="toggleUploadStatus('${item.sku.replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1.5 bg-purple-50 hover:bg-purple-100 border border-purple-300 text-purple-700 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all active:scale-95 cursor-pointer group/btn" title="Klik untuk tandai sudah diupload"><span class="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse group-hover/btn:animate-none"></span> Belum Terupload</button>`;
+                        }
                     }
 
                     const extraInfo = tabName === 'only2' && (item.brand !== '-' || item.category !== '-')
@@ -799,8 +672,17 @@
                         else diffValHtml = `<span class="text-slate-400 font-bold">0</span>`;
                     }
 
+                    const safeSkuEscaped = (item.sku || '').replace(/'/g, "\\'");
+
                     tr.innerHTML = `
-                        <td class="py-4 px-5 font-mono text-slate-700 font-bold whitespace-nowrap bg-slate-50/50">${item.sku}</td>
+                        <td class="py-4 px-5 font-mono text-slate-700 font-bold whitespace-nowrap bg-slate-50/50">
+                            <div class="flex items-center justify-between gap-3">
+                                <span>${item.sku}</span>
+                                <button onclick="copySku('${safeSkuEscaped}')" class="text-slate-400 hover:text-blue-600 transition-colors p-1.5 rounded-md hover:bg-blue-100/50 active:scale-95" title="Salin Kode SKU">
+                                    <i class="ph ph-copy text-lg"></i>
+                                </button>
+                            </div>
+                        </td>
                         <td class="py-4 px-5 text-slate-600 leading-snug">
                             <span class="line-clamp-2 font-bold text-slate-900" title="${item.productName}">${item.productName}</span>
                             ${extraInfo}

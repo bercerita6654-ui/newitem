@@ -73,6 +73,12 @@
                 </div>
                 <h1 class="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight">Komparasi SKU & Stok</h1>
                 <p class="text-slate-500 mt-2 text-sm">Temukan selisih stok dan kelola target upload produk Anda dengan rapi dan mudah.</p>
+                
+                <!-- Realtime Clock Display -->
+                <div class="flex items-center justify-center md:justify-start gap-2 text-xs font-medium text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm w-fit mt-3 mx-auto md:mx-0">
+                    <i class="ph-bold ph-clock text-indigo-500"></i>
+                    <span id="realtimeClock">Memuat waktu...</span>
+                </div>
             </div>
             
             <button id="processBtn" onclick="mulaiKomparasi()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-indigo-200 transition-all active:scale-95 flex items-center gap-3">
@@ -229,13 +235,19 @@
             </div>
         </div>
         
-        <div class="h-6 w-px bg-slate-200 mx-1"></div>
+        <div class="h-8 w-px bg-slate-200 mx-1"></div>
         
         <div class="flex items-center gap-3">
-            <div id="missionSlots" class="flex items-center gap-1.5">
-                <!-- Slots injected by JS -->
+            <div class="flex flex-col items-center">
+                <div id="missionSlots" class="flex items-center gap-1.5">
+                    <!-- Slots injected by JS -->
+                </div>
+                <!-- Duration tracker display -->
+                <div id="uploadDurationTxt" class="text-[10px] text-slate-400 mt-1.5 font-medium tracking-wide">
+                    Belum ada aktivitas
+                </div>
             </div>
-            <div class="ml-1 bg-slate-50 px-3 py-1 rounded-lg border border-slate-200 text-center">
+            <div class="ml-1 bg-slate-50 px-3 py-1 rounded-lg border border-slate-200 text-center self-start mt-0.5">
                 <span class="text-lg font-bold text-indigo-600" id="missionCountTxt">0</span><span class="text-slate-400 font-semibold text-xs"> / 5</span>
             </div>
         </div>
@@ -257,9 +269,32 @@
         const dailyMissionTarget = 5;
         let selectedForMission = [];
         let savedUploadData = {}; 
+        
+        // Smart Timing State
+        let queueTimestamps = {}; // Untuk menyimpan waktu saat di klik tambah target
+        let lastDurationRecord = "-";
 
         window.onload = function() {
             initLocalStorage();
+            startRealtimeClock();
+        }
+
+        function startRealtimeClock() {
+            const clockEl = document.getElementById('realtimeClock');
+            setInterval(() => {
+                const now = new Date();
+                const options = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit',
+                    timeZoneName: 'short'
+                };
+                clockEl.textContent = now.toLocaleDateString('id-ID', options).replace(/\./g, ':');
+            }, 1000);
         }
 
         function initLocalStorage() {
@@ -691,7 +726,11 @@
                 } else if (currentActiveTab === 'only2') {
                     if (savedUploadData[item.sku]) {
                         // Already Uploaded
-                        statusHtml = `<button onclick="toggleUploadStatus('${safeSku}')" class="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-rose-50 text-emerald-600 hover:text-rose-600 border border-emerald-200 hover:border-rose-200 px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm group"><i class="ph-bold ph-check group-hover:hidden"></i><i class="ph-bold ph-x hidden group-hover:block"></i> Batal</button>`;
+                        statusHtml = `
+                        <button onclick="toggleUploadStatus('${safeSku}')" class="inline-flex items-center justify-center gap-1.5 bg-emerald-50 hover:bg-rose-50 text-emerald-600 hover:text-rose-600 border border-emerald-200 hover:border-rose-200 px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm group w-36">
+                            <span class="inline-flex items-center gap-1 group-hover:hidden"><i class="ph-bold ph-check"></i> Sudah Terupload</span>
+                            <span class="hidden group-hover:inline-flex items-center gap-1"><i class="ph-bold ph-x"></i> Batal</span>
+                        </button>`;
                     } else if (selectedForMission.includes(item.sku)) {
                         // Queued for Upload
                         statusHtml = `
@@ -711,19 +750,38 @@
             });
         }
 
+        function formatDuration(ms) {
+            if (ms < 0 || isNaN(ms)) return "-";
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            if (minutes > 0) return `${minutes}m ${seconds}s`;
+            return `${seconds} detik`;
+        }
+
         function queueMission(sku) {
             const idx = selectedForMission.indexOf(sku);
             if (idx === -1) {
                 selectedForMission.push(sku); // Add to queue
+                queueTimestamps[sku] = Date.now(); // Record the exact time we queue it
             } else {
                 selectedForMission.splice(idx, 1); // Remove from queue
+                delete queueTimestamps[sku]; // Delete timestamp record
             }
             renderTable();
         }
 
         function executeUpload(sku) {
+            // Calculate timing before deleting the reference
+            const clickTime = Date.now();
+            if (queueTimestamps[sku]) {
+                const durationMs = clickTime - queueTimestamps[sku];
+                lastDurationRecord = "Durasi Upload: " + formatDuration(durationMs);
+            }
+
             // Remove from waiting queue, add to uploaded storage
             selectedForMission = selectedForMission.filter(s => s !== sku); 
+            delete queueTimestamps[sku];
             savedUploadData[sku] = true;
             saveToLocal();
             
@@ -752,6 +810,7 @@
             const panel = document.getElementById('missionPanel');
             const slots = document.getElementById('missionSlots');
             const textCount = document.getElementById('missionCountTxt');
+            const durationTxt = document.getElementById('uploadDurationTxt');
             if(!slots) return;
             
             const count = getUploadedCount();
@@ -761,13 +820,23 @@
             let slotsHtml = '';
             for(let i=0; i<dailyMissionTarget; i++) {
                 if(i < displayCount) {
-                    slotsHtml += `<div class="w-7 h-7 rounded slot-filled flex items-center justify-center"><i class="ph-fill ph-star text-white text-xs drop-shadow-sm"></i></div>`;
+                    // Make the star yellow specifically as requested
+                    slotsHtml += `<div class="w-7 h-7 rounded slot-filled flex items-center justify-center"><i class="ph-fill ph-star text-yellow-400 text-sm drop-shadow-sm"></i></div>`;
                 } else {
                     slotsHtml += `<div class="w-7 h-7 rounded bg-slate-100 border border-slate-200 flex items-center justify-center mission-slot shadow-inner"><i class="ph-fill ph-star text-slate-300 text-xs"></i></div>`;
                 }
             }
             slots.innerHTML = slotsHtml;
             textCount.textContent = count;
+            
+            // Show real-time duration calc text
+            if (lastDurationRecord !== "-") {
+                durationTxt.textContent = lastDurationRecord;
+                durationTxt.classList.add("text-indigo-500");
+                durationTxt.classList.remove("text-slate-400");
+            } else {
+                durationTxt.textContent = "Belum ada aktivitas";
+            }
             
             if(displayCount === dailyMissionTarget) {
                 panel.classList.add('border-indigo-300', 'bg-indigo-50');
@@ -794,7 +863,7 @@
 
         function fireConfettiSmall() {
              if(typeof confetti !== 'undefined') {
-                 confetti({ particleCount: 40, spread: 50, origin: { y: 0.8 }, zIndex: 100, colors: ['#6366f1', '#818cf8', '#10b981'] });
+                 confetti({ particleCount: 40, spread: 50, origin: { y: 0.8 }, zIndex: 100, colors: ['#6366f1', '#fbbf24', '#10b981'] });
              }
         }
 

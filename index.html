@@ -9,131 +9,106 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #0b0f19; 
-            color: #e2e8f0;
+            background-color: #0f172a; /* Slate 900 - soft dark */
+            color: #cbd5e1; /* Slate 300 */
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* 3D Mesh Background - Midnight Aurora Theme */
-        .bg-mesh {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: -1;
-            background-image: 
-                radial-gradient(at 15% 0%, hsla(280, 60%, 15%, 1) 0, transparent 50%), 
-                radial-gradient(at 85% 0%, hsla(190, 80%, 12%, 1) 0, transparent 50%), 
-                radial-gradient(at 50% 100%, hsla(340, 50%, 15%, 1) 0, transparent 50%);
-            background-color: #0b0f19;
-            opacity: 0.8;
-        }
-
-        /* Glassmorphism Classes */
-        .glass { 
-            background: rgba(17, 24, 39, 0.65); 
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        /* Clean Cards */
+        .clean-card { 
+            background-color: #1e293b; /* Slate 800 */
+            border: 1px solid #334155; /* Slate 700 */
+            border-radius: 1rem;
+            transition: all 0.2s ease-in-out;
         }
         
-        .glass-card { 
-            background: rgba(17, 24, 39, 0.5); 
-            backdrop-filter: blur(12px); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .glass-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255,255,255,0.02);
+        .clean-card-hover:hover {
+            border-color: #475569; /* Slate 600 */
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         }
 
         /* Table Styles */
-        .table-row { transition: all 0.2s; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .table-row:hover { background-color: rgba(255,255,255,0.04); }
+        .table-row { transition: background-color 0.15s; border-bottom: 1px solid #334155; }
+        .table-row:hover { background-color: #334155; /* Slate 700 */ }
         .table-row:last-child { border-bottom: none; }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(11, 15, 25, 0.8); }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; border: 2px solid rgba(11,15,25,1); }
-        ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+        /* Custom Scrollbar minimal */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
-        /* Game UI Styles */
-        .mission-slot { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        /* Game UI Styles Minimal */
+        .mission-slot { transition: all 0.3s ease; }
         .slot-filled { 
-            background: linear-gradient(135deg, #06b6d4, #3b82f6); 
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.6); 
-            transform: scale(1.15); 
-            border-color: transparent !important;
+            background-color: #3b82f6; /* Blue 500 */
+            transform: scale(1.1); 
         }
         
         /* Loader */
-        .loader { border: 3px solid rgba(255,255,255,0.1); border-bottom-color: #06b6d4; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        .loader { border: 3px solid #334155; border-bottom-color: #3b82f6; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 
-<body class="min-h-screen text-slate-200">
-    <div class="bg-mesh"></div>
-
+<body class="min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
         <!-- Header Section -->
-        <header class="mb-12 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
+        <header class="mb-10 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-bold mb-4 shadow-[0_0_15px_rgba(6,182,212,0.2)] tracking-wide uppercase">
-                    <i class="ph-fill ph-sparkle"></i> AIO Smart Sync
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-xs font-semibold mb-4 tracking-wide">
+                    <i class="ph-fill ph-sparkle text-blue-500"></i> AIO Smart Sync
                 </div>
-                <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white via-cyan-100 to-slate-400 tracking-tight">Komparasi SKU & Stok</h1>
-                <p class="text-slate-400 mt-3 font-medium text-sm md:text-base">Temukan selisih stok dan kelola target upload produk harian Anda dengan cepat.</p>
+                <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Komparasi SKU & Stok</h1>
+                <p class="text-slate-400 mt-2 text-sm">Temukan selisih stok dan kelola target upload produk Anda dengan rapi dan mudah.</p>
             </div>
             
-            <button id="processBtn" onclick="mulaiKomparasi()" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-cyan-500/25 transition-all duration-300 active:scale-95 flex items-center gap-3 border border-cyan-400/50 hover:shadow-cyan-400/40">
-                <i class="ph-bold ph-magic-wand text-2xl"></i>
+            <button id="processBtn" onclick="mulaiKomparasi()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-xl font-semibold shadow-sm transition-all active:scale-95 flex items-center gap-3">
+                <i class="ph-bold ph-magic-wand text-xl"></i>
                 <span id="processText">Mulai Analisis</span>
                 <div id="processLoader" class="loader hidden"></div>
             </button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
             <!-- Upload Data 1 -->
-            <div class="glass p-6 rounded-3xl relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 transition-all group-hover:bg-blue-500/20"></div>
-                <h3 class="text-lg font-bold mb-1 flex items-center gap-2 text-white"><i class="ph-fill ph-database text-blue-400 text-xl"></i> File Data 1</h3>
-                <p class="text-xs text-slate-400 mb-5 font-medium">Mulai baris ke-7 | SKU (Kolom 5 & 6) | Stok (Kolom 9)</p>
+            <div class="clean-card p-6 relative group">
+                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-white"><i class="ph-fill ph-database text-slate-400"></i> File Data 1</h3>
+                <p class="text-xs text-slate-500 mb-4">Mulai baris ke-7 | SKU (Kol 5 & 6) | Stok (Kol 9)</p>
                 
-                <label for="file1" class="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-600/60 border-dashed rounded-2xl cursor-pointer bg-slate-800/30 hover:bg-slate-800/60 hover:border-blue-400/60 transition-all">
+                <label for="file1" class="flex flex-col items-center justify-center w-full h-28 border border-slate-600 border-dashed rounded-xl cursor-pointer bg-slate-800/50 hover:bg-slate-700 transition-colors">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6" id="uploadState1">
-                        <i class="ph-bold ph-upload-simple text-3xl text-slate-400 mb-2 group-hover:text-blue-400 group-hover:-translate-y-1 transition-all"></i>
-                        <p class="text-sm font-semibold text-slate-300">Pilih file Data 1</p>
+                        <i class="ph-bold ph-upload-simple text-2xl text-slate-400 mb-2"></i>
+                        <p class="text-sm font-medium text-slate-300">Pilih file Data 1</p>
                     </div>
-                    <div id="successState1" class="hidden flex-col items-center justify-center pt-5 pb-6 w-full h-full bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl border border-blue-500/20">
-                        <i class="ph-fill ph-check-circle text-3xl text-cyan-400 mb-1 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]"></i>
-                        <p id="filename1" class="text-sm font-bold text-cyan-300 text-center px-4 truncate w-full"></p>
+                    <div id="successState1" class="hidden flex-col items-center justify-center w-full h-full bg-slate-800 rounded-xl">
+                        <i class="ph-fill ph-check-circle text-2xl text-emerald-500 mb-1"></i>
+                        <p id="filename1" class="text-sm font-semibold text-slate-200 text-center px-4 truncate w-full"></p>
                     </div>
                     <input id="file1" type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(this, 1)" />
                 </label>
             </div>
 
             <!-- Upload DATA AIO -->
-            <div class="glass p-6 rounded-3xl relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -mr-10 -mt-10 transition-all group-hover:bg-purple-500/20"></div>
-                <h3 class="text-lg font-bold mb-1 flex items-center gap-2 text-white"><i class="ph-fill ph-cube text-purple-400 text-xl"></i> File DATA AIO</h3>
-                <p class="text-xs text-slate-400 mb-5 font-medium">Mulai baris ke-2 | SKU (Kol 1) | Stok (Kol 13) | Kategori (5) | Merk (7)</p>
+            <div class="clean-card p-6 relative group">
+                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-white"><i class="ph-fill ph-cube text-slate-400"></i> File DATA AIO</h3>
+                <p class="text-xs text-slate-500 mb-4">Mulai baris ke-2 | SKU (Kol 1) | Stok (Kol 13) | Kategori (5) | Merk (7)</p>
                 
-                <label for="fileAio" class="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-600/60 border-dashed rounded-2xl cursor-pointer bg-slate-800/30 hover:bg-slate-800/60 hover:border-purple-400/60 transition-all">
+                <label for="fileAio" class="flex flex-col items-center justify-center w-full h-28 border border-slate-600 border-dashed rounded-xl cursor-pointer bg-slate-800/50 hover:bg-slate-700 transition-colors">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6" id="uploadStateAio">
-                        <i class="ph-bold ph-upload-simple text-3xl text-slate-400 mb-2 group-hover:text-purple-400 group-hover:-translate-y-1 transition-all"></i>
-                        <p class="text-sm font-semibold text-slate-300">Pilih file DATA AIO</p>
+                        <i class="ph-bold ph-upload-simple text-2xl text-slate-400 mb-2"></i>
+                        <p class="text-sm font-medium text-slate-300">Pilih file DATA AIO</p>
                     </div>
-                    <div id="successStateAio" class="hidden flex-col items-center justify-center pt-5 pb-6 w-full h-full bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/20">
-                        <i class="ph-fill ph-check-circle text-3xl text-pink-400 mb-1 drop-shadow-[0_0_10px_rgba(236,72,153,0.5)]"></i>
-                        <p id="filenameAio" class="text-sm font-bold text-pink-300 text-center px-4 truncate w-full"></p>
+                    <div id="successStateAio" class="hidden flex-col items-center justify-center w-full h-full bg-slate-800 rounded-xl">
+                        <i class="ph-fill ph-check-circle text-2xl text-emerald-500 mb-1"></i>
+                        <p id="filenameAio" class="text-sm font-semibold text-slate-200 text-center px-4 truncate w-full"></p>
                     </div>
                     <input id="fileAio" type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(this, 'Aio')" />
                 </label>
@@ -142,59 +117,54 @@
 
         <div id="summaryCards" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 hidden">
             <!-- Card 1: Selisih -->
-            <div onclick="switchTab('mismatch')" id="tab-mismatch" class="glass-card p-5 rounded-2xl cursor-pointer relative overflow-hidden flex items-center gap-4 border-l-4 border-l-transparent">
-                <i class="ph-fill ph-warning-octagon text-6xl absolute -right-6 -bottom-4 text-red-500/10 rotate-12 transition-transform group-hover:scale-110"></i>
-                <div class="p-3 bg-red-500/10 rounded-xl border border-red-500/20"><i class="ph-bold ph-scales text-2xl text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.5)]"></i></div>
+            <div onclick="switchTab('mismatch')" id="tab-mismatch" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4">
+                <div class="p-3 bg-rose-500/10 rounded-lg text-rose-500"><i class="ph-bold ph-scales text-xl"></i></div>
                 <div>
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Selisih Stok</p>
-                    <h4 class="text-3xl font-black text-white" id="countMismatch">0</h4>
+                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">Selisih Stok</p>
+                    <h4 class="text-2xl font-bold text-white" id="countMismatch">0</h4>
                 </div>
             </div>
             
             <!-- Card 2: Match -->
-            <div onclick="switchTab('match')" id="tab-match" class="glass-card p-5 rounded-2xl cursor-pointer relative overflow-hidden flex items-center gap-4 border-l-4 border-l-transparent">
-                <i class="ph-fill ph-check-circle text-6xl absolute -right-6 -bottom-4 text-emerald-500/10 rotate-12 transition-transform group-hover:scale-110"></i>
-                <div class="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20"><i class="ph-bold ph-check-square-offset text-2xl text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]"></i></div>
+            <div onclick="switchTab('match')" id="tab-match" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4">
+                <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-500"><i class="ph-bold ph-check-square-offset text-xl"></i></div>
                 <div>
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Stok Sama</p>
-                    <h4 class="text-3xl font-black text-white" id="countMatch">0</h4>
+                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">Stok Sama</p>
+                    <h4 class="text-2xl font-bold text-white" id="countMatch">0</h4>
                 </div>
             </div>
 
             <!-- Card 3: Only Data 1 -->
-            <div onclick="switchTab('only1')" id="tab-only1" class="glass-card p-5 rounded-2xl cursor-pointer relative overflow-hidden flex items-center gap-4 border-l-4 border-l-transparent">
-                <i class="ph-fill ph-database text-6xl absolute -right-6 -bottom-4 text-blue-500/10 rotate-12 transition-transform group-hover:scale-110"></i>
-                <div class="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20"><i class="ph-bold ph-database text-2xl text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]"></i></div>
+            <div onclick="switchTab('only1')" id="tab-only1" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4">
+                <div class="p-3 bg-slate-700/50 rounded-lg text-slate-300"><i class="ph-bold ph-database text-xl"></i></div>
                 <div>
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Hanya Data 1</p>
-                    <h4 class="text-3xl font-black text-white" id="countOnly1">0</h4>
+                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">Hanya Data 1</p>
+                    <h4 class="text-2xl font-bold text-white" id="countOnly1">0</h4>
                 </div>
             </div>
 
             <!-- Card 4: Unuploaded -->
-            <div onclick="switchTab('only2')" id="tab-only2" class="glass-card p-5 rounded-2xl cursor-pointer relative overflow-hidden flex items-center gap-4 border-l-4 border-l-transparent">
-                <i class="ph-fill ph-rocket-launch text-6xl absolute -right-6 -bottom-4 text-purple-500/10 rotate-12 transition-transform group-hover:scale-110"></i>
-                <div class="p-3 bg-purple-500/10 rounded-xl border border-purple-500/20"><i class="ph-bold ph-cloud-arrow-up text-2xl text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.5)]"></i></div>
+            <div onclick="switchTab('only2')" id="tab-only2" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4">
+                <div class="p-3 bg-indigo-500/10 rounded-lg text-indigo-400"><i class="ph-bold ph-cloud-arrow-up text-xl"></i></div>
                 <div>
-                    <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-1 whitespace-nowrap">Belum Terupload</p>
-                    <h4 class="text-3xl font-black text-white" id="countOnly2">0</h4>
+                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">Belum Terupload</p>
+                    <h4 class="text-2xl font-bold text-white" id="countOnly2">0</h4>
                 </div>
             </div>
         </div>
 
-        <div id="resultsSection" class="glass rounded-3xl overflow-hidden shadow-2xl hidden opacity-0 translate-y-10 transition-all duration-700 border border-slate-700/50">
+        <div id="resultsSection" class="clean-card overflow-hidden hidden opacity-0 translate-y-4 transition-all duration-500">
             <!-- Header Filter Bar -->
-            <div id="resultsHeaderBar" class="p-5 border-b border-slate-700/50 bg-slate-900/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
-                <div id="headerGlow" class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-50"></div>
+            <div class="p-4 border-b border-slate-700 bg-slate-800/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 
                 <!-- Global Search -->
-                <div class="relative w-full md:w-80 group">
-                    <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-400 transition-colors"></i>
-                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari SKU atau Nama Produk..." class="w-full pl-11 pr-4 py-2.5 bg-slate-800/80 border border-slate-600/50 rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 focus:bg-slate-800 text-sm font-medium placeholder-slate-500 transition-all shadow-inner">
+                <div class="relative w-full md:w-80 text-slate-300">
+                    <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari SKU atau Nama Produk..." class="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:border-blue-500 text-sm placeholder-slate-500 transition-colors">
                 </div>
 
                 <!-- Dynamic Controls based on Tab -->
-                <div id="dynamicControls" class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                <div id="dynamicControls" class="flex flex-wrap items-center gap-2 w-full md:w-auto">
                     <!-- Placeholder for dynamic filters -->
                 </div>
             </div>
@@ -202,68 +172,66 @@
             <!-- Table -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
-                    <thead class="bg-gradient-to-r from-slate-900 via-slate-800/80 to-slate-900 text-xs uppercase font-extrabold text-slate-400 tracking-wider">
+                    <thead class="bg-slate-900/50 text-[11px] uppercase font-bold text-slate-400 tracking-wider">
                         <tr id="tableHead">
                             <!-- Headers injected via JS -->
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="text-sm font-medium divide-y divide-slate-700/30">
+                    <tbody id="tableBody" class="text-sm divide-y divide-slate-800">
                         <!-- Rows injected via JS -->
                     </tbody>
                 </table>
             </div>
             
             <!-- Pagination -->
-            <div id="paginationBlock" class="p-4 border-t border-slate-700/50 bg-slate-900/60 flex items-center justify-between hidden">
-                <p class="text-xs font-semibold text-slate-400">Menampilkan <span id="pageInfoStart" class="text-white">0</span> - <span id="pageInfoEnd" class="text-white">0</span> dari <span id="pageInfoTotal" class="text-white">0</span></p>
+            <div id="paginationBlock" class="p-4 border-t border-slate-700 bg-slate-800/50 flex items-center justify-between hidden">
+                <p class="text-xs text-slate-400">Menampilkan <span id="pageInfoStart" class="text-slate-200 font-medium">0</span> - <span id="pageInfoEnd" class="text-slate-200 font-medium">0</span> dari <span id="pageInfoTotal" class="text-slate-200 font-medium">0</span></p>
                 <div class="flex gap-2">
-                    <button onclick="previousPage()" id="btnPrev" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600/50 rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:border-slate-500">Sebelumnya</button>
-                    <button onclick="nextPage()" id="btnNext" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600/50 rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:border-slate-500">Selanjutnya</button>
+                    <button onclick="previousPage()" id="btnPrev" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Sebelumnya</button>
+                    <button onclick="nextPage()" id="btnNext" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Selanjutnya</button>
                 </div>
             </div>
 
             <!-- Empty State -->
-            <div id="emptyState" class="hidden py-20 text-center">
-                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-800/50 mb-5 shadow-[0_0_30px_rgba(0,0,0,0.5)] border border-slate-700/50">
-                    <i class="ph-fill ph-ghost text-4xl text-slate-500"></i>
+            <div id="emptyState" class="hidden py-16 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-800 mb-4 text-slate-500">
+                    <i class="ph-fill ph-ghost text-3xl"></i>
                 </div>
-                <p class="text-slate-400 font-semibold text-lg">Tidak ada data yang ditemukan.</p>
-                <p class="text-slate-500 text-sm mt-1">Coba sesuaikan filter atau kata kunci pencarian Anda.</p>
+                <p class="text-slate-300 font-medium">Tidak ada data yang ditemukan.</p>
+                <p class="text-slate-500 text-xs mt-1">Coba sesuaikan filter pencarian Anda.</p>
             </div>
         </div>
     </div>
 
     <!-- Notification -->
-    <div id="notification" class="fixed top-8 right-8 bg-slate-900 text-white px-5 py-4 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-slate-700 flex items-center gap-4 transform translate-x-[200%] opacity-0 transition-all duration-500 z-50 min-w-[280px]">
-        <div id="notifIconBg" class="p-2 rounded-full bg-cyan-500/20">
-            <i class="ph-fill ph-info text-2xl text-cyan-400" id="notifIcon"></i>
-        </div>
+    <div id="notification" class="fixed top-6 right-6 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-3 transform translate-x-[200%] opacity-0 transition-all duration-300 z-50">
+        <i class="ph-fill ph-check-circle text-xl text-emerald-500" id="notifIcon"></i>
         <div>
-            <h4 class="text-sm font-bold" id="notifTitle">Informasi</h4>
-            <p id="notifText" class="text-xs text-slate-400 mt-0.5 font-medium">Pesan notifikasi</p>
+            <h4 class="text-sm font-semibold" id="notifTitle">Informasi</h4>
+            <p id="notifText" class="text-xs text-slate-400 mt-0.5">Pesan notifikasi</p>
         </div>
     </div>
 
     <!-- HUD Mission Panel -->
-    <div id="missionPanel" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900/95 backdrop-blur-xl border border-cyan-500/30 p-3 md:px-6 md:py-3 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.7),0_0_20px_rgba(6,182,212,0.2)] z-40 flex flex-col md:flex-row items-center gap-4 transition-all duration-500 translate-y-[200%] opacity-0">
-        <div class="flex items-center gap-3">
-            <div class="bg-gradient-to-br from-cyan-500 to-blue-600 p-2.5 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.5)]">
-                <i class="ph-fill ph-target text-xl text-white animate-pulse"></i>
+    <div id="missionPanel" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-700 p-3 rounded-2xl shadow-2xl z-40 flex items-center gap-4 transition-all duration-300 translate-y-[200%] opacity-0">
+        <div class="flex items-center gap-2">
+            <div class="bg-blue-600 p-2 rounded-lg text-white">
+                <i class="ph-fill ph-target text-lg"></i>
             </div>
-            <div class="flex flex-col">
-                <span class="text-[9px] font-black text-cyan-400 uppercase tracking-widest leading-none mb-1">Misi Harian</span>
-                <span class="text-xs font-bold text-white leading-none">Target Upload</span>
+            <div class="flex flex-col ml-1 hidden sm:flex">
+                <span class="text-[10px] text-slate-400 uppercase tracking-wide leading-none mb-1">Misi Harian</span>
+                <span class="text-xs font-bold text-slate-200 leading-none">Target Upload</span>
             </div>
         </div>
         
-        <div class="h-6 w-px bg-slate-700 hidden md:block mx-1"></div>
+        <div class="h-6 w-px bg-slate-700 mx-1"></div>
         
         <div class="flex items-center gap-3">
-            <div id="missionSlots" class="flex items-center gap-2">
+            <div id="missionSlots" class="flex items-center gap-1.5">
                 <!-- Slots injected by JS -->
             </div>
-            <div id="missionText" class="ml-2 bg-slate-800 px-4 py-1.5 rounded-xl border border-slate-600 text-center shadow-inner">
-                <span class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400" id="missionCountTxt">0</span><span class="text-slate-400 font-bold text-xs"> / 5</span>
+            <div class="ml-1 bg-slate-900 px-3 py-1 rounded-lg border border-slate-700 text-center">
+                <span class="text-lg font-bold text-blue-400" id="missionCountTxt">0</span><span class="text-slate-500 font-semibold text-xs"> / 5</span>
             </div>
         </div>
     </div>
@@ -285,7 +253,6 @@
         let selectedForMission = [];
         let savedUploadData = {}; 
 
-        // Initializer
         window.onload = function() {
             initLocalStorage();
         }
@@ -343,24 +310,20 @@
             document.getElementById('notifTitle').textContent = title;
             document.getElementById('notifText').textContent = text;
             
-            const iconBg = document.getElementById('notifIconBg');
             const icon = document.getElementById('notifIcon');
-            
             if(isWarning) {
-                iconBg.className = 'p-2 rounded-full bg-red-500/20';
-                icon.className = 'ph-fill ph-warning-circle text-2xl text-red-400';
+                icon.className = 'ph-fill ph-warning-circle text-xl text-rose-500';
             } else {
-                iconBg.className = 'p-2 rounded-full bg-cyan-500/20';
-                icon.className = 'ph-fill ph-check-circle text-2xl text-cyan-400';
+                icon.className = 'ph-fill ph-check-circle text-xl text-emerald-500';
             }
 
             notif.classList.remove('translate-x-[200%]', 'opacity-0');
-            setTimeout(() => { notif.classList.add('translate-x-[200%]', 'opacity-0'); }, 3500);
+            setTimeout(() => { notif.classList.add('translate-x-[200%]', 'opacity-0'); }, 3000);
         }
 
         function copyToClipboard(text, typeName) {
             navigator.clipboard.writeText(text).then(() => {
-                showNotification("Tersalin!", `${typeName} ${text} berhasil disalin.`);
+                showNotification("Disalin", `${typeName} berhasil disalin.`);
             }).catch(err => {
                 const el = document.createElement('textarea');
                 el.value = text;
@@ -368,7 +331,7 @@
                 el.select();
                 document.execCommand('copy');
                 document.body.removeChild(el);
-                showNotification("Tersalin!", `${typeName} ${text} berhasil disalin.`);
+                showNotification("Disalin", `${typeName} berhasil disalin.`);
             });
         }
 
@@ -397,7 +360,7 @@
             const fileAio = document.getElementById('fileAio').files[0];
 
             if (!file1 || !fileAio) {
-                showNotification("File Belum Lengkap", "Harap unggah kedua file (Data 1 & DATA AIO) terlebih dahulu.", true);
+                showNotification("File Kurang", "Harap unggah Data 1 & DATA AIO.", true);
                 return;
             }
 
@@ -467,14 +430,19 @@
                 updateMissionPanel();
                 
                 document.getElementById('summaryCards').classList.remove('hidden');
-                document.getElementById('resultsSection').classList.remove('hidden', 'opacity-0', 'translate-y-10');
+                
+                const resultsSection = document.getElementById('resultsSection');
+                resultsSection.classList.remove('hidden');
+                // Trigger reflow
+                void resultsSection.offsetWidth;
+                resultsSection.classList.remove('opacity-0', 'translate-y-4');
                 
                 switchTab('mismatch');
-                showNotification("Analisis Selesai!", "Data berhasil dikomparasi secara otomatis.");
+                showNotification("Selesai", "Data berhasil dikomparasi.");
 
             } catch (error) {
                 console.error(error);
-                showNotification("Error", "Gagal membaca file Excel. Pastikan format benar.", true);
+                showNotification("Error", "Gagal membaca Excel.", true);
             } finally {
                 btn.classList.remove('opacity-80', 'cursor-not-allowed');
                 text.textContent = 'Mulai Analisis';
@@ -483,44 +451,37 @@
         }
 
         function switchTab(tabName) {
-            currentActiveTab = tabName;
-            currentPage = 1;
+            try {
+                currentActiveTab = tabName;
+                currentPage = 1;
+                document.getElementById('searchInput').value = '';
+                globalSearchQuery = '';
 
-            ['mismatch', 'match', 'only1', 'only2'].forEach(t => {
-                const el = document.getElementById(`tab-${t}`);
-                if(el) {
-                    el.classList.remove('border-l-red-500', 'border-l-emerald-500', 'border-l-blue-500', 'border-l-purple-500', 'bg-slate-800/80', 'shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]');
-                    el.classList.add('border-l-transparent');
+                ['mismatch', 'match', 'only1', 'only2'].forEach(t => {
+                    const el = document.getElementById(`tab-${t}`);
+                    if(el) {
+                        el.classList.remove('bg-slate-700', 'border-slate-500');
+                        el.classList.add('bg-slate-800', 'border-slate-700');
+                    }
+                });
+
+                const activeEl = document.getElementById(`tab-${tabName}`);
+                if(activeEl) {
+                    activeEl.classList.add('bg-slate-700', 'border-slate-500');
+                    activeEl.classList.remove('bg-slate-800', 'border-slate-700');
                 }
-            });
 
-            const activeEl = document.getElementById(`tab-${tabName}`);
-            const glowBar = document.getElementById('headerGlow');
-            if(!activeEl) return;
-            
-            activeEl.classList.add('bg-slate-800/80', 'shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]');
-            activeEl.classList.remove('border-l-transparent');
-            
-            if (tabName === 'mismatch') {
-                activeEl.classList.add('border-l-red-500'); glowBar.className = "absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-50";
-            } else if (tabName === 'match') {
-                activeEl.classList.add('border-l-emerald-500'); glowBar.className = "absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-50";
-            } else if (tabName === 'only1') {
-                activeEl.classList.add('border-l-blue-500'); glowBar.className = "absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50";
-            } else if (tabName === 'only2') {
-                activeEl.classList.add('border-l-purple-500'); glowBar.className = "absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50";
-            }
+                const missionPanel = document.getElementById('missionPanel');
+                if(tabName === 'only2') {
+                    missionPanel.classList.remove('translate-y-[200%]', 'opacity-0');
+                    updateMissionPanel();
+                } else {
+                    missionPanel.classList.add('translate-y-[200%]', 'opacity-0');
+                }
 
-            const missionPanel = document.getElementById('missionPanel');
-            if(tabName === 'only2') {
-                missionPanel.classList.remove('translate-y-[200%]', 'opacity-0');
-                updateMissionPanel();
-            } else {
-                missionPanel.classList.add('translate-y-[200%]', 'opacity-0');
-            }
-
-            renderDynamicControls();
-            renderTable();
+                renderDynamicControls();
+                renderTable();
+            } catch (e) { console.error("Tab switch error", e); }
         }
 
         function renderDynamicControls() {
@@ -530,30 +491,30 @@
             if (currentActiveTab === 'mismatch') {
                 html = `
                     <div class="flex gap-2">
-                        <input type="number" id="min1" placeholder="Min Stok D1" class="w-24 px-3 py-2 bg-slate-800/80 border border-slate-600/50 rounded-lg text-xs" oninput="updateMismatchFilter()">
-                        <input type="number" id="max1" placeholder="Max Stok D1" class="w-24 px-3 py-2 bg-slate-800/80 border border-slate-600/50 rounded-lg text-xs" oninput="updateMismatchFilter()">
+                        <input type="number" id="min1" placeholder="Min Stok D1" class="w-24 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200" oninput="updateMismatchFilter()">
+                        <input type="number" id="max1" placeholder="Max Stok D1" class="w-24 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200" oninput="updateMismatchFilter()">
                     </div>
                     <div class="flex gap-2">
-                        <input type="number" id="minAio" placeholder="Min Stok AIO" class="w-28 px-3 py-2 bg-slate-800/80 border border-slate-600/50 rounded-lg text-xs" oninput="updateMismatchFilter()">
-                        <input type="number" id="maxAio" placeholder="Max Stok AIO" class="w-28 px-3 py-2 bg-slate-800/80 border border-slate-600/50 rounded-lg text-xs" oninput="updateMismatchFilter()">
+                        <input type="number" id="minAio" placeholder="Min Stok AIO" class="w-24 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200" oninput="updateMismatchFilter()">
+                        <input type="number" id="maxAio" placeholder="Max Stok AIO" class="w-24 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200" oninput="updateMismatchFilter()">
                     </div>
                 `;
             } else if (currentActiveTab === 'only2') {
                 html = `
-                    <select id="filterCategory" onchange="handleOnly2Filters()" class="w-40 px-3 py-2 bg-slate-800/80 border border-slate-600/50 rounded-lg text-xs font-semibold cursor-pointer outline-none focus:border-cyan-500">
+                    <select id="filterCategory" onchange="handleOnly2Filters()" class="w-40 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200 cursor-pointer">
                         <option value="">Semua Kategori</option>
                         ${generateOptions('category')}
                     </select>
-                    <select id="filterBrand" onchange="handleOnly2Filters()" class="w-40 px-3 py-2 bg-slate-800/80 border border-slate-600/50 rounded-lg text-xs font-semibold cursor-pointer outline-none focus:border-cyan-500">
+                    <select id="filterBrand" onchange="handleOnly2Filters()" class="w-40 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200 cursor-pointer">
                         <option value="">Semua Merk</option>
                         ${generateOptions('brand')}
                     </select>
-                    <select id="sortOnly2" onchange="handleOnly2Filters()" class="w-32 px-3 py-2 bg-slate-800/80 border border-slate-600/50 rounded-lg text-xs font-semibold cursor-pointer outline-none focus:border-cyan-500">
-                        <option value="">Urutan Stok</option>
-                        <option value="desc">Stok Terbanyak</option>
-                        <option value="asc">Stok Tersedikit</option>
+                    <select id="sortOnly2" onchange="handleOnly2Filters()" class="w-32 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200 cursor-pointer">
+                        <option value="">Urutkan Stok</option>
+                        <option value="desc">Tinggi ke Rendah</option>
+                        <option value="asc">Rendah ke Tinggi</option>
                     </select>
-                    <div class="bg-purple-500/20 text-purple-300 px-3 py-1.5 rounded-lg border border-purple-500/30 text-xs font-bold shadow-inner" id="badgeOnly2Count">0 Ditampilkan</div>
+                    <div class="bg-slate-700 text-slate-300 px-3 py-1.5 rounded border border-slate-600 text-xs font-semibold" id="badgeOnly2Count">0 Ditampilkan</div>
                 `;
             }
             container.innerHTML = html;
@@ -566,7 +527,7 @@
                 if(val === "") val = "-";
                 counts[val] = (counts[val] || 0) + 1;
             });
-            let opts = Object.keys(counts).sort().map(val => `<option value="${val}">${val} (${counts[val]} SKU)</option>`);
+            let opts = Object.keys(counts).sort().map(val => `<option value="${val}">${val} (${counts[val]})</option>`);
             return opts.join('');
         }
 
@@ -641,16 +602,16 @@
                 document.getElementById('emptyState').classList.add('hidden');
             }
 
-            let headersHtml = `<th class="px-6 py-4">Kode SKU</th>`;
-            if (currentActiveTab !== 'only1') headersHtml += `<th class="px-6 py-4">Nama Produk</th>`;
+            let headersHtml = `<th class="px-5 py-3 font-semibold">Kode SKU</th>`;
+            if (currentActiveTab !== 'only1') headersHtml += `<th class="px-5 py-3 font-semibold">Nama Produk</th>`;
             if (currentActiveTab === 'mismatch' || currentActiveTab === 'match') {
-                headersHtml += `<th class="px-6 py-4 text-center">Stok Data 1</th><th class="px-6 py-4 text-center">Stok AIO</th>`;
+                headersHtml += `<th class="px-5 py-3 font-semibold text-center w-24">Data 1</th><th class="px-5 py-3 font-semibold text-center w-24">AIO</th>`;
             } else if (currentActiveTab === 'only1') {
-                headersHtml += `<th class="px-6 py-4 text-center">Stok Data 1</th>`;
+                headersHtml += `<th class="px-5 py-3 font-semibold text-center w-24">Stok D1</th>`;
             } else if (currentActiveTab === 'only2') {
-                headersHtml += `<th class="px-6 py-4 text-center">Stok AIO</th>`;
+                headersHtml += `<th class="px-5 py-3 font-semibold text-center w-24">Stok AIO</th>`;
             }
-            headersHtml += `<th class="px-6 py-4 text-right">Status</th>`;
+            headersHtml += `<th class="px-5 py-3 font-semibold text-right">Status</th>`;
             thead.innerHTML = headersHtml;
 
             const totalItems = data.length;
@@ -673,16 +634,15 @@
                 const tr = document.createElement('tr');
                 tr.className = 'table-row';
                 
-                // Safe escaping for both SKU and Name to prevent HTML injection/quote breaking
                 const safeSku = String(item.sku || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 const safeName = String(item.name || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 
                 let html = `
-                    <td class="px-6 py-3 font-bold text-white align-top pt-4">
-                        <div class="flex items-center gap-2">
+                    <td class="px-5 py-3 align-top pt-4">
+                        <div class="flex items-center gap-2 font-medium text-slate-200">
                             ${item.sku}
-                            <button onclick="copyToClipboard('${safeSku}', 'SKU')" class="text-slate-500 hover:text-cyan-400 hover:scale-110 transition-transform" title="Salin SKU">
-                                <i class="ph-bold ph-copy text-lg"></i>
+                            <button onclick="copyToClipboard('${safeSku}', 'SKU')" class="text-slate-500 hover:text-blue-400 transition-colors" title="Salin SKU">
+                                <i class="ph-bold ph-copy text-base"></i>
                             </button>
                         </div>
                     </td>`;
@@ -690,12 +650,12 @@
                 if (currentActiveTab !== 'only1') {
                     let meta = '';
                     if(currentActiveTab === 'only2') {
-                        meta = `<div class="text-[10px] text-slate-500 uppercase tracking-widest mt-1.5 flex items-center gap-2"><span class="bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700/50"><i class="ph-fill ph-tag"></i> ${item.brand || '-'}</span> <span class="bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700/50"><i class="ph-fill ph-folder"></i> ${item.category || '-'}</span></div>`;
+                        meta = `<div class="text-[10px] text-slate-500 mt-1 flex items-center gap-2"><span class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">${item.brand || '-'}</span> <span class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">${item.category || '-'}</span></div>`;
                     }
-                    html += `<td class="px-6 py-3 min-w-[300px] align-top pt-4">
+                    html += `<td class="px-5 py-3 min-w-[280px] align-top pt-4">
                         <div class="flex items-start gap-2">
-                            <div class="font-semibold text-slate-300 break-words leading-relaxed" title="${item.name}">${item.name}</div>
-                            <button onclick="copyToClipboard('${safeName}', 'Nama Produk')" class="text-slate-500 hover:text-pink-400 hover:scale-110 transition-transform mt-0.5 shrink-0" title="Salin Nama Produk">
+                            <div class="text-slate-300 break-words leading-relaxed text-sm" title="${item.name}">${item.name}</div>
+                            <button onclick="copyToClipboard('${safeName}', 'Nama Produk')" class="text-slate-500 hover:text-blue-400 transition-colors mt-0.5 shrink-0" title="Salin Nama Produk">
                                 <i class="ph-bold ph-copy text-base"></i>
                             </button>
                         </div>
@@ -705,36 +665,36 @@
 
                 if (currentActiveTab === 'mismatch' || currentActiveTab === 'match') {
                     html += `
-                        <td class="px-6 py-3 text-center align-top pt-4"><span class="px-3 py-1 bg-slate-800/80 border border-blue-500/20 rounded-lg text-blue-400 font-black inline-block min-w-[3rem]">${item.stock1}</span></td>
-                        <td class="px-6 py-3 text-center align-top pt-4"><span class="px-3 py-1 bg-slate-800/80 border border-purple-500/20 rounded-lg text-purple-400 font-black inline-block min-w-[3rem]">${item.stockAio}</span></td>`;
+                        <td class="px-5 py-3 text-center align-top pt-4"><span class="text-slate-300 font-semibold">${item.stock1}</span></td>
+                        <td class="px-5 py-3 text-center align-top pt-4"><span class="text-slate-300 font-semibold">${item.stockAio}</span></td>`;
                 } else if (currentActiveTab === 'only1') {
-                    html += `<td class="px-6 py-3 text-center align-top pt-4"><span class="px-3 py-1 bg-slate-800/80 border border-blue-500/20 rounded-lg text-blue-400 font-black inline-block min-w-[3rem]">${item.stock1}</span></td>`;
+                    html += `<td class="px-5 py-3 text-center align-top pt-4"><span class="text-slate-300 font-semibold">${item.stock1}</span></td>`;
                 } else if (currentActiveTab === 'only2') {
-                    html += `<td class="px-6 py-3 text-center align-top pt-4"><span class="px-3 py-1 bg-slate-800/80 border border-purple-500/20 rounded-lg text-purple-400 font-black inline-block min-w-[3rem]">${item.stockAio}</span></td>`;
+                    html += `<td class="px-5 py-3 text-center align-top pt-4"><span class="text-slate-300 font-semibold">${item.stockAio}</span></td>`;
                 }
 
                 let statusHtml = '';
                 if (currentActiveTab === 'mismatch') {
-                    statusHtml = `<span class="inline-flex items-center gap-1.5 bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1 rounded-lg text-xs font-bold"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Selisih</span>`;
+                    statusHtml = `<span class="inline-flex items-center px-2 py-1 bg-rose-500/10 text-rose-400 rounded text-xs font-semibold">Selisih</span>`;
                 } else if (currentActiveTab === 'match') {
-                    statusHtml = `<span class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-lg text-xs font-bold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Sama</span>`;
+                    statusHtml = `<span class="inline-flex items-center px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded text-xs font-semibold">Sama</span>`;
                 } else if (currentActiveTab === 'only1') {
-                    statusHtml = `<span class="inline-flex items-center gap-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-lg text-xs font-bold"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Data 1</span>`;
+                    statusHtml = `<span class="inline-flex items-center px-2 py-1 bg-slate-700 text-slate-300 rounded text-xs font-semibold">Data 1</span>`;
                 } else if (currentActiveTab === 'only2') {
                     if (savedUploadData[item.sku]) {
-                        statusHtml = `<button onclick="toggleUploadStatus('${safeSku}')" class="inline-flex items-center gap-1.5 bg-teal-500/20 text-teal-400 border border-teal-500/30 hover:bg-teal-500/30 px-4 py-2 rounded-xl text-xs font-bold transition-all"><i class="ph-fill ph-check-circle text-sm"></i> Sudah Upload</button>`;
+                        statusHtml = `<button onclick="toggleUploadStatus('${safeSku}')" class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 px-3 py-1.5 rounded text-xs font-semibold transition-colors"><i class="ph-bold ph-check"></i> Selesai Upload</button>`;
                     } else if (selectedForMission.includes(item.sku)) {
                         statusHtml = `
                         <div class="flex items-center justify-end">
-                            <button onclick="executeUpload('${safeSku}')" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white px-3 py-2 rounded-l-xl text-xs font-bold shadow-lg shadow-cyan-500/20 active:scale-95 transition-all group/btn z-10"><i class="ph-bold ph-rocket-launch group-hover/btn:-translate-y-0.5 group-hover/btn:translate-x-0.5 transition-transform"></i> Upload Sekarang!</button>
-                            <button onclick="queueMission('${safeSku}')" class="bg-slate-700/80 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border-y border-r border-slate-600/50 px-2.5 py-2 rounded-r-xl text-xs transition-all"><i class="ph-bold ph-x"></i></button>
+                            <button onclick="executeUpload('${safeSku}')" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-l text-xs font-semibold transition-colors z-10 flex items-center gap-1"><i class="ph-bold ph-rocket-launch"></i> Upload</button>
+                            <button onclick="queueMission('${safeSku}')" class="bg-slate-700 hover:bg-rose-500/80 text-slate-300 hover:text-white px-2 py-1.5 rounded-r text-xs transition-colors border-l border-slate-800"><i class="ph-bold ph-x"></i></button>
                         </div>`;
                     } else {
-                        statusHtml = `<button onclick="queueMission('${safeSku}')" class="inline-flex items-center gap-1.5 bg-slate-800/80 hover:bg-purple-500/20 text-slate-300 hover:text-purple-400 border border-slate-600/50 hover:border-purple-500/50 px-4 py-2 rounded-xl text-xs font-bold transition-all"><i class="ph-bold ph-crosshair"></i> Tambah Target</button>`;
+                        statusHtml = `<button onclick="queueMission('${safeSku}')" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded text-xs font-semibold transition-colors">Tambah Antrean</button>`;
                     }
                 }
 
-                html += `<td class="px-6 py-3 text-right align-top pt-3">${statusHtml}</td>`;
+                html += `<td class="px-5 py-3 text-right align-top pt-3.5">${statusHtml}</td>`;
                 tr.innerHTML = html;
                 tbody.appendChild(tr);
             });
@@ -761,10 +721,9 @@
             
             if (count > 0 && count % dailyMissionTarget === 0) {
                 fireConfetti();
-                showNotification("Misi Selesai!", `Luar biasa! Anda telah menyelesaikan target ${dailyMissionTarget} produk.`);
+                showNotification("Misi Selesai!", `Mantap! Anda telah mencapai target ${dailyMissionTarget} produk.`);
             } else {
                 fireConfettiSmall();
-                showNotification("Kerja Bagus!", `Produk berhasil ditandai sudah upload.`);
             }
         }
 
@@ -790,33 +749,31 @@
             let slotsHtml = '';
             for(let i=0; i<dailyMissionTarget; i++) {
                 if(i < displayCount) {
-                    slotsHtml += `<div class="w-8 h-8 rounded-lg slot-filled flex items-center justify-center border border-cyan-400/50 transform transition-all"><i class="ph-fill ph-star text-white text-sm"></i></div>`;
+                    slotsHtml += `<div class="w-7 h-7 rounded slot-filled flex items-center justify-center border border-blue-400/50"><i class="ph-fill ph-star text-white text-xs"></i></div>`;
                 } else {
-                    slotsHtml += `<div class="w-8 h-8 rounded-lg bg-slate-800/80 border border-slate-600/50 flex items-center justify-center mission-slot opacity-40"><i class="ph-bold ph-star text-slate-500 text-sm"></i></div>`;
+                    slotsHtml += `<div class="w-7 h-7 rounded bg-slate-900 border border-slate-700 flex items-center justify-center mission-slot"><i class="ph-fill ph-star text-slate-700 text-xs"></i></div>`;
                 }
             }
             slots.innerHTML = slotsHtml;
             textCount.textContent = count;
             
             if(displayCount === dailyMissionTarget) {
-                panel.classList.add('shadow-cyan-500/40', 'border-cyan-500/80');
-                panel.classList.remove('border-cyan-500/30');
+                panel.classList.add('border-blue-500/50', 'shadow-[0_0_20px_rgba(59,130,246,0.15)]');
             } else {
-                panel.classList.remove('shadow-cyan-500/40', 'border-cyan-500/80');
-                panel.classList.add('border-cyan-500/30');
+                panel.classList.remove('border-blue-500/50', 'shadow-[0_0_20px_rgba(59,130,246,0.15)]');
             }
         }
 
         function fireConfetti() {
             if(typeof confetti !== 'undefined') {
-                var duration = 3 * 1000;
+                var duration = 2.5 * 1000;
                 var animationEnd = Date.now() + duration;
-                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+                var defaults = { startVelocity: 25, spread: 360, ticks: 60, zIndex: 100 };
 
                 var interval = setInterval(function() {
                     var timeLeft = animationEnd - Date.now();
                     if (timeLeft <= 0) { return clearInterval(interval); }
-                    var particleCount = 50 * (timeLeft / duration);
+                    var particleCount = 40 * (timeLeft / duration);
                     confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
                     confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
                 }, 250);
@@ -825,7 +782,7 @@
 
         function fireConfettiSmall() {
              if(typeof confetti !== 'undefined') {
-                 confetti({ particleCount: 80, spread: 70, origin: { y: 0.8 }, zIndex: 100, colors: ['#06b6d4', '#3b82f6', '#a855f7'] });
+                 confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, zIndex: 100, colors: ['#3b82f6', '#60a5fa', '#10b981'] });
              }
         }
 

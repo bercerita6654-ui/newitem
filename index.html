@@ -82,12 +82,23 @@
             </button>
         </header>
 
+        <!-- Marketplace Switcher -->
+        <div class="flex justify-center md:justify-start mb-6">
+            <div class="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-sm">
+                <button onclick="switchMarketplace('shopee')" id="btnShopee" class="px-6 py-2 rounded-lg text-sm font-semibold bg-white text-indigo-600 shadow-sm transition-all">Shopee</button>
+                <button onclick="switchMarketplace('tokopedia')" id="btnTokped" class="px-6 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 transition-all">Tokopedia</button>
+            </div>
+        </div>
+
         <!-- Upload Section -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
             <!-- Upload Data 1 -->
             <div class="clean-card p-5 relative group">
-                <h3 class="text-sm font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-database text-slate-400"></i> File Data 1</h3>
-                <p class="text-[11px] text-slate-500 mb-3">Mulai Baris 7 | SKU (Kol 6/5) | Stok (Kol 9)</p>
+                <h3 class="text-sm font-semibold mb-1 flex items-center gap-2 text-slate-800">
+                    <i class="ph-fill ph-database text-slate-400"></i> 
+                    <span id="labelData1">File Data 1 (Shopee)</span>
+                </h3>
+                <p id="descData1" class="text-[11px] text-slate-500 mb-3">Mulai Baris 7 | SKU (Kol 6/5) | Stok (Kol 9)</p>
                 <label for="file1" class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
                     <div class="flex flex-col items-center justify-center pt-4 pb-4" id="uploadState1">
                         <i class="ph-bold ph-upload-simple text-xl text-slate-400 mb-1"></i>
@@ -281,6 +292,7 @@
 
     <script>
         // Global State
+        let currentMarketplace = 'shopee';
         let comparisonResults = { mismatch: [], match: [], only1: [], only2: [], discontinued: [] };
         let currentActiveTab = 'mismatch';
         
@@ -317,115 +329,24 @@
             const storedData = localStorage.getItem('aioUploadDataV2');
             if (storedData) {
                 try {
-                    const parsed = JSON.parse(storedData);
-                    if (parsed.date === today) {
-                        savedUploadData = parsed.uploadedSkus || {};
-                    } else {
-                        savedUploadData = {};
-                        saveToLocal();
-                    }
-                } catch(e) { savedUploadData = {}; }
-            }
-        }
-
-        function saveToLocal() {
-            const today = new Date().toISOString().split('T')[0];
-            localStorage.setItem('aioUploadDataV2', JSON.stringify({
-                date: today,
-                uploadedSkus: savedUploadData
-            }));
-        }
-
-        function getUploadedCount() {
-            return Object.keys(savedUploadData).length;
-        }
-
-        function handleFileUpload(input, type) {
-            const file = input.files[0];
-            if (file) {
-                const mapType = type === 1 ? '1' : (type === 3 ? '3' : 'Aio');
-                const uploadState = document.getElementById(`uploadState${mapType}`);
-                const successState = document.getElementById(`successState${mapType}`);
-                const filenameText = document.getElementById(`filename${mapType}`);
-                
-                filenameText.textContent = file.name;
-                uploadState.classList.add('hidden');
-                successState.classList.remove('hidden');
-                successState.classList.add('flex');
-            }
-        }
-
-        function showNotification(title, text, isWarning = false) {
-            const notif = document.getElementById('notification');
-            document.getElementById('notifTitle').textContent = title;
-            document.getElementById('notifText').textContent = text;
-            const icon = document.getElementById('notifIcon');
-            icon.className = isWarning ? 'ph-fill ph-warning-circle text-xl text-rose-500' : 'ph-fill ph-check-circle text-xl text-emerald-500';
-            notif.classList.remove('translate-x-[200%]', 'opacity-0');
-            setTimeout(() => { notif.classList.add('translate-x-[200%]', 'opacity-0'); }, 3000);
-        }
-
-        function copyToClipboard(text, typeName) {
-            navigator.clipboard.writeText(text).then(() => {
-                showNotification("Disalin", `${typeName} berhasil disalin.`);
-            }).catch(err => {
-                const el = document.createElement('textarea');
-                el.value = text;
-                document.body.appendChild(el);
-                el.select();
-                document.execCommand('copy');
-                document.body.removeChild(el);
-                showNotification("Disalin", `${typeName} berhasil disalin.`);
-            });
-        }
-
-        function readExcel(file, startRow) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, {type: 'array'});
-                        const firstSheetName = workbook.SheetNames[0];
-                        const worksheet = workbook.Sheets[firstSheetName];
-                        const json = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ""});
-                        resolve(json.slice(startRow - 1));
-                    } catch(err) { reject(err); }
-                };
-                reader.onerror = reject;
-                reader.readAsArrayBuffer(file);
-            });
-        }
-
-        async function mulaiKomparasi() {
-            const file1 = document.getElementById('file1').files[0];
-            const fileAio = document.getElementById('fileAio').files[0];
-            const file3 = document.getElementById('file3').files[0];
-
-            if (!file1 || !fileAio) {
-                showNotification("File Kurang", "Harap unggah minimal Data 1 & DATA AIO.", true);
-                return;
-            }
-
-            const btn = document.getElementById('processBtn');
-            const text = document.getElementById('processText');
-            const loader = document.getElementById('processLoader');
-            btn.classList.add('opacity-80', 'cursor-not-allowed');
-            text.textContent = 'Memproses...';
-            loader.classList.remove('hidden');
-
-            try {
-                const data1 = await readExcel(file1, 7);
+                let startRow1 = currentMarketplace === 'tokopedia' ? 4 : 7;
+                const data1 = await readExcel(file1, startRow1);
                 const dataAio = await readExcel(fileAio, 2);
                 let data3 = [];
                 if (file3) data3 = await readExcel(file3, 2);
 
                 const map1 = new Map();
                 data1.forEach(row => {
-                    let sku5 = String(row[4] || "").trim();
-                    let sku6 = String(row[5] || "").trim();
-                    let sku = sku6 !== "" ? sku6 : sku5; 
-                    let stock = parseFloat(row[8]);
+                    let sku = "";
+                    if (currentMarketplace === 'tokopedia') {
+                        sku = String(row[3] || "").trim(); // Kolom ke-4 (Index 3)
+                    } else {
+                        let sku5 = String(row[4] || "").trim();
+                        let sku6 = String(row[5] || "").trim();
+                        sku = sku6 !== "" ? sku6 : sku5; 
+                    }
+                    
+                    let stock = parseFloat(row[8]); // Asumsi kolom stok tetap di Kolom 9 (Index 8)
                     stock = isNaN(stock) ? 0 : stock;
                     if(sku !== "" && sku !== "undefined" && sku !== "0") { 
                         map1.set(sku, { stock: stock });
@@ -931,6 +852,31 @@
         }
 
         function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+        function switchMarketplace(mp) {
+            currentMarketplace = mp;
+            const btnShopee = document.getElementById('btnShopee');
+            const btnTokped = document.getElementById('btnTokped');
+            const labelData1 = document.getElementById('labelData1');
+            const descData1 = document.getElementById('descData1');
+            
+            if (mp === 'shopee') {
+                btnShopee.className = "px-6 py-2 rounded-lg text-sm font-semibold bg-white text-indigo-600 shadow-sm transition-all";
+                btnTokped.className = "px-6 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 transition-all";
+                labelData1.textContent = "File Data 1 (Shopee)";
+                descData1.textContent = "Mulai Baris 7 | SKU (Kol 6/5) | Stok (Kol 9)";
+            } else {
+                btnTokped.className = "px-6 py-2 rounded-lg text-sm font-semibold bg-white text-emerald-600 shadow-sm transition-all";
+                btnShopee.className = "px-6 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 transition-all";
+                labelData1.textContent = "File Data 1 (Tokopedia)";
+                descData1.textContent = "Mulai Baris 4 | SKU (Kol 4) | Stok (Kol 9)";
+            }
+            
+            // Sembunyikan hasil sebelumnya agar tidak tercampur
+            document.getElementById('summaryCards').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            comparisonResults = { mismatch: [], match: [], only1: [], only2: [], discontinued: [] };
+        }
     </script>
 </body>
 </html>

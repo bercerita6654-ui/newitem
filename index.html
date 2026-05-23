@@ -14,47 +14,52 @@
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #0f172a; /* Slate 900 - soft dark */
-            color: #cbd5e1; /* Slate 300 */
+            background-color: #f8fafc; /* Slate 50 - Very soft pastel grey/blue */
+            color: #334155; /* Slate 700 */
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Clean Cards */
+        /* Clean White Cards */
         .clean-card { 
-            background-color: #1e293b; /* Slate 800 */
-            border: 1px solid #334155; /* Slate 700 */
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0; /* Slate 200 */
             border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             transition: all 0.2s ease-in-out;
         }
         
         .clean-card-hover:hover {
-            border-color: #475569; /* Slate 600 */
+            border-color: #cbd5e1; /* Slate 300 */
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
         }
 
-        /* Table Styles */
-        .table-row { transition: background-color 0.15s; border-bottom: 1px solid #334155; }
-        .table-row:hover { background-color: #334155; /* Slate 700 */ }
+        /* Table Styles Light */
+        .table-row { transition: background-color 0.15s; border-bottom: 1px solid #f1f5f9; /* Slate 100 */ }
+        .table-row:hover { background-color: #f8fafc; /* Slate 50 */ }
         .table-row:last-child { border-bottom: none; }
         
-        /* Custom Scrollbar minimal */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        /* Custom Scrollbar Soft */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Game UI Styles Minimal */
+        /* Game UI Styles Pastel */
         .mission-slot { transition: all 0.3s ease; }
         .slot-filled { 
-            background-color: #3b82f6; /* Blue 500 */
+            background-color: #6366f1; /* Indigo 500 */
             transform: scale(1.1); 
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
         }
         
-        /* Loader */
-        .loader { border: 3px solid #334155; border-bottom-color: #3b82f6; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
+        /* Loader Light */
+        .loader { border: 3px solid #e2e8f0; border-bottom-color: #6366f1; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Custom Select Input Style */
+        select { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; }
     </style>
 </head>
 
@@ -63,14 +68,14 @@
         <!-- Header Section -->
         <header class="mb-10 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-xs font-semibold mb-4 tracking-wide">
-                    <i class="ph-fill ph-sparkle text-blue-500"></i> AIO Smart Sync
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-semibold mb-4 tracking-wide shadow-sm">
+                    <i class="ph-fill ph-sparkle text-indigo-500"></i> AIO Smart Sync
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Komparasi SKU & Stok</h1>
-                <p class="text-slate-400 mt-2 text-sm">Temukan selisih stok dan kelola target upload produk Anda dengan rapi dan mudah.</p>
+                <h1 class="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight">Komparasi SKU & Stok</h1>
+                <p class="text-slate-500 mt-2 text-sm">Temukan selisih stok dan kelola target upload produk Anda dengan rapi dan mudah.</p>
             </div>
             
-            <button id="processBtn" onclick="mulaiKomparasi()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-xl font-semibold shadow-sm transition-all active:scale-95 flex items-center gap-3">
+            <button id="processBtn" onclick="mulaiKomparasi()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-indigo-200 transition-all active:scale-95 flex items-center gap-3">
                 <i class="ph-bold ph-magic-wand text-xl"></i>
                 <span id="processText">Mulai Analisis</span>
                 <div id="processLoader" class="loader hidden"></div>
@@ -80,17 +85,17 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
             <!-- Upload Data 1 -->
             <div class="clean-card p-6 relative group">
-                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-white"><i class="ph-fill ph-database text-slate-400"></i> File Data 1</h3>
+                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-database text-slate-400"></i> File Data 1</h3>
                 <p class="text-xs text-slate-500 mb-4">Mulai baris ke-7 | SKU (Kol 5 & 6) | Stok (Kol 9)</p>
                 
-                <label for="file1" class="flex flex-col items-center justify-center w-full h-28 border border-slate-600 border-dashed rounded-xl cursor-pointer bg-slate-800/50 hover:bg-slate-700 transition-colors">
+                <label for="file1" class="flex flex-col items-center justify-center w-full h-28 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6" id="uploadState1">
                         <i class="ph-bold ph-upload-simple text-2xl text-slate-400 mb-2"></i>
-                        <p class="text-sm font-medium text-slate-300">Pilih file Data 1</p>
+                        <p class="text-sm font-medium text-slate-600">Pilih file Data 1</p>
                     </div>
-                    <div id="successState1" class="hidden flex-col items-center justify-center w-full h-full bg-slate-800 rounded-xl">
+                    <div id="successState1" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100">
                         <i class="ph-fill ph-check-circle text-2xl text-emerald-500 mb-1"></i>
-                        <p id="filename1" class="text-sm font-semibold text-slate-200 text-center px-4 truncate w-full"></p>
+                        <p id="filename1" class="text-sm font-semibold text-emerald-700 text-center px-4 truncate w-full"></p>
                     </div>
                     <input id="file1" type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(this, 1)" />
                 </label>
@@ -98,17 +103,17 @@
 
             <!-- Upload DATA AIO -->
             <div class="clean-card p-6 relative group">
-                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-white"><i class="ph-fill ph-cube text-slate-400"></i> File DATA AIO</h3>
+                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-cube text-slate-400"></i> File DATA AIO</h3>
                 <p class="text-xs text-slate-500 mb-4">Mulai baris ke-2 | SKU (Kol 1) | Stok (Kol 13) | Kategori (5) | Merk (7)</p>
                 
-                <label for="fileAio" class="flex flex-col items-center justify-center w-full h-28 border border-slate-600 border-dashed rounded-xl cursor-pointer bg-slate-800/50 hover:bg-slate-700 transition-colors">
+                <label for="fileAio" class="flex flex-col items-center justify-center w-full h-28 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6" id="uploadStateAio">
                         <i class="ph-bold ph-upload-simple text-2xl text-slate-400 mb-2"></i>
-                        <p class="text-sm font-medium text-slate-300">Pilih file DATA AIO</p>
+                        <p class="text-sm font-medium text-slate-600">Pilih file DATA AIO</p>
                     </div>
-                    <div id="successStateAio" class="hidden flex-col items-center justify-center w-full h-full bg-slate-800 rounded-xl">
+                    <div id="successStateAio" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100">
                         <i class="ph-fill ph-check-circle text-2xl text-emerald-500 mb-1"></i>
-                        <p id="filenameAio" class="text-sm font-semibold text-slate-200 text-center px-4 truncate w-full"></p>
+                        <p id="filenameAio" class="text-sm font-semibold text-emerald-700 text-center px-4 truncate w-full"></p>
                     </div>
                     <input id="fileAio" type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(this, 'Aio')" />
                 </label>
@@ -117,50 +122,50 @@
 
         <div id="summaryCards" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 hidden">
             <!-- Card 1: Selisih -->
-            <div onclick="switchTab('mismatch')" id="tab-mismatch" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4">
-                <div class="p-3 bg-rose-500/10 rounded-lg text-rose-500"><i class="ph-bold ph-scales text-xl"></i></div>
+            <div onclick="switchTab('mismatch')" id="tab-mismatch" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4 transition-all">
+                <div class="p-3 bg-rose-100 rounded-lg text-rose-500"><i class="ph-bold ph-scales text-xl"></i></div>
                 <div>
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">Selisih Stok</p>
-                    <h4 class="text-2xl font-bold text-white" id="countMismatch">0</h4>
+                    <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wide">Selisih Stok</p>
+                    <h4 class="text-2xl font-bold text-slate-800" id="countMismatch">0</h4>
                 </div>
             </div>
             
             <!-- Card 2: Match -->
-            <div onclick="switchTab('match')" id="tab-match" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4">
-                <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-500"><i class="ph-bold ph-check-square-offset text-xl"></i></div>
+            <div onclick="switchTab('match')" id="tab-match" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4 transition-all">
+                <div class="p-3 bg-emerald-100 rounded-lg text-emerald-600"><i class="ph-bold ph-check-square-offset text-xl"></i></div>
                 <div>
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">Stok Sama</p>
-                    <h4 class="text-2xl font-bold text-white" id="countMatch">0</h4>
+                    <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wide">Stok Sama</p>
+                    <h4 class="text-2xl font-bold text-slate-800" id="countMatch">0</h4>
                 </div>
             </div>
 
             <!-- Card 3: Only Data 1 -->
-            <div onclick="switchTab('only1')" id="tab-only1" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4">
-                <div class="p-3 bg-slate-700/50 rounded-lg text-slate-300"><i class="ph-bold ph-database text-xl"></i></div>
+            <div onclick="switchTab('only1')" id="tab-only1" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4 transition-all">
+                <div class="p-3 bg-slate-100 rounded-lg text-slate-500"><i class="ph-bold ph-database text-xl"></i></div>
                 <div>
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">Hanya Data 1</p>
-                    <h4 class="text-2xl font-bold text-white" id="countOnly1">0</h4>
+                    <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wide">Hanya Data 1</p>
+                    <h4 class="text-2xl font-bold text-slate-800" id="countOnly1">0</h4>
                 </div>
             </div>
 
             <!-- Card 4: Unuploaded -->
-            <div onclick="switchTab('only2')" id="tab-only2" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4">
-                <div class="p-3 bg-indigo-500/10 rounded-lg text-indigo-400"><i class="ph-bold ph-cloud-arrow-up text-xl"></i></div>
+            <div onclick="switchTab('only2')" id="tab-only2" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4 transition-all">
+                <div class="p-3 bg-indigo-100 rounded-lg text-indigo-500"><i class="ph-bold ph-cloud-arrow-up text-xl"></i></div>
                 <div>
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">Belum Terupload</p>
-                    <h4 class="text-2xl font-bold text-white" id="countOnly2">0</h4>
+                    <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Produk Belum Terupload</p>
+                    <h4 class="text-2xl font-bold text-slate-800" id="countOnly2">0</h4>
                 </div>
             </div>
         </div>
 
-        <div id="resultsSection" class="clean-card overflow-hidden hidden opacity-0 translate-y-4 transition-all duration-500">
+        <div id="resultsSection" class="clean-card overflow-hidden hidden opacity-0 translate-y-4 transition-all duration-500 shadow-sm border border-slate-200">
             <!-- Header Filter Bar -->
-            <div class="p-4 border-b border-slate-700 bg-slate-800/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="p-4 border-b border-slate-200 bg-slate-50/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 
                 <!-- Global Search -->
-                <div class="relative w-full md:w-80 text-slate-300">
+                <div class="relative w-full md:w-80 text-slate-600">
                     <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari SKU atau Nama Produk..." class="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:outline-none focus:border-blue-500 text-sm placeholder-slate-500 transition-colors">
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari SKU atau Nama Produk..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 text-sm placeholder-slate-400 transition-colors shadow-sm">
                 </div>
 
                 <!-- Dynamic Controls based on Tab -->
@@ -170,68 +175,68 @@
             </div>
 
             <!-- Table -->
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto bg-white">
                 <table class="w-full text-left border-collapse">
-                    <thead class="bg-slate-900/50 text-[11px] uppercase font-bold text-slate-400 tracking-wider">
+                    <thead class="bg-slate-50 text-[11px] uppercase font-bold text-slate-500 tracking-wider border-b border-slate-200">
                         <tr id="tableHead">
                             <!-- Headers injected via JS -->
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="text-sm divide-y divide-slate-800">
+                    <tbody id="tableBody" class="text-sm divide-y divide-slate-100">
                         <!-- Rows injected via JS -->
                     </tbody>
                 </table>
             </div>
             
             <!-- Pagination -->
-            <div id="paginationBlock" class="p-4 border-t border-slate-700 bg-slate-800/50 flex items-center justify-between hidden">
-                <p class="text-xs text-slate-400">Menampilkan <span id="pageInfoStart" class="text-slate-200 font-medium">0</span> - <span id="pageInfoEnd" class="text-slate-200 font-medium">0</span> dari <span id="pageInfoTotal" class="text-slate-200 font-medium">0</span></p>
+            <div id="paginationBlock" class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between hidden">
+                <p class="text-xs text-slate-500">Menampilkan <span id="pageInfoStart" class="text-slate-800 font-medium">0</span> - <span id="pageInfoEnd" class="text-slate-800 font-medium">0</span> dari <span id="pageInfoTotal" class="text-slate-800 font-medium">0</span></p>
                 <div class="flex gap-2">
-                    <button onclick="previousPage()" id="btnPrev" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Sebelumnya</button>
-                    <button onclick="nextPage()" id="btnNext" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Selanjutnya</button>
+                    <button onclick="previousPage()" id="btnPrev" class="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 rounded text-xs font-medium text-slate-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">Sebelumnya</button>
+                    <button onclick="nextPage()" id="btnNext" class="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 rounded text-xs font-medium text-slate-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">Selanjutnya</button>
                 </div>
             </div>
 
             <!-- Empty State -->
-            <div id="emptyState" class="hidden py-16 text-center">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-800 mb-4 text-slate-500">
+            <div id="emptyState" class="hidden py-16 text-center bg-white">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 border border-slate-100 mb-4 text-slate-300">
                     <i class="ph-fill ph-ghost text-3xl"></i>
                 </div>
-                <p class="text-slate-300 font-medium">Tidak ada data yang ditemukan.</p>
+                <p class="text-slate-700 font-medium">Tidak ada data yang ditemukan.</p>
                 <p class="text-slate-500 text-xs mt-1">Coba sesuaikan filter pencarian Anda.</p>
             </div>
         </div>
     </div>
 
     <!-- Notification -->
-    <div id="notification" class="fixed top-6 right-6 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-3 transform translate-x-[200%] opacity-0 transition-all duration-300 z-50">
+    <div id="notification" class="fixed top-6 right-6 bg-white text-slate-800 px-4 py-3 rounded-xl shadow-xl shadow-slate-200/50 border border-slate-200 flex items-center gap-3 transform translate-x-[200%] opacity-0 transition-all duration-300 z-50">
         <i class="ph-fill ph-check-circle text-xl text-emerald-500" id="notifIcon"></i>
         <div>
-            <h4 class="text-sm font-semibold" id="notifTitle">Informasi</h4>
-            <p id="notifText" class="text-xs text-slate-400 mt-0.5">Pesan notifikasi</p>
+            <h4 class="text-sm font-semibold text-slate-800" id="notifTitle">Informasi</h4>
+            <p id="notifText" class="text-xs text-slate-500 mt-0.5">Pesan notifikasi</p>
         </div>
     </div>
 
     <!-- HUD Mission Panel -->
-    <div id="missionPanel" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-700 p-3 rounded-2xl shadow-2xl z-40 flex items-center gap-4 transition-all duration-300 translate-y-[200%] opacity-0">
+    <div id="missionPanel" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white border border-slate-200 p-3 rounded-2xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1)] z-40 flex items-center gap-4 transition-all duration-300 translate-y-[200%] opacity-0">
         <div class="flex items-center gap-2">
-            <div class="bg-blue-600 p-2 rounded-lg text-white">
+            <div class="bg-indigo-500 p-2 rounded-lg text-white shadow-sm">
                 <i class="ph-fill ph-target text-lg"></i>
             </div>
             <div class="flex flex-col ml-1 hidden sm:flex">
-                <span class="text-[10px] text-slate-400 uppercase tracking-wide leading-none mb-1">Misi Harian</span>
-                <span class="text-xs font-bold text-slate-200 leading-none">Target Upload</span>
+                <span class="text-[10px] text-slate-500 uppercase tracking-wide leading-none mb-1">Misi Harian</span>
+                <span class="text-xs font-bold text-slate-700 leading-none">Target Upload</span>
             </div>
         </div>
         
-        <div class="h-6 w-px bg-slate-700 mx-1"></div>
+        <div class="h-6 w-px bg-slate-200 mx-1"></div>
         
         <div class="flex items-center gap-3">
             <div id="missionSlots" class="flex items-center gap-1.5">
                 <!-- Slots injected by JS -->
             </div>
-            <div class="ml-1 bg-slate-900 px-3 py-1 rounded-lg border border-slate-700 text-center">
-                <span class="text-lg font-bold text-blue-400" id="missionCountTxt">0</span><span class="text-slate-500 font-semibold text-xs"> / 5</span>
+            <div class="ml-1 bg-slate-50 px-3 py-1 rounded-lg border border-slate-200 text-center">
+                <span class="text-lg font-bold text-indigo-600" id="missionCountTxt">0</span><span class="text-slate-400 font-semibold text-xs"> / 5</span>
             </div>
         </div>
     </div>
@@ -257,10 +262,9 @@
             initLocalStorage();
         }
 
-        // Local Storage Logic
         function initLocalStorage() {
             const today = new Date().toISOString().split('T')[0]; 
-            const storedData = localStorage.getItem('aioUploadData');
+            const storedData = localStorage.getItem('aioUploadDataV2');
             
             if (storedData) {
                 try {
@@ -281,7 +285,7 @@
 
         function saveToLocal() {
             const today = new Date().toISOString().split('T')[0];
-            localStorage.setItem('aioUploadData', JSON.stringify({
+            localStorage.setItem('aioUploadDataV2', JSON.stringify({
                 date: today,
                 uploadedSkus: savedUploadData
             }));
@@ -426,15 +430,12 @@
                 document.getElementById('countOnly1').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.only1.length);
                 document.getElementById('countOnly2').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.only2.length);
 
-                selectedForMission = [];
                 updateMissionPanel();
-                
                 document.getElementById('summaryCards').classList.remove('hidden');
                 
                 const resultsSection = document.getElementById('resultsSection');
                 resultsSection.classList.remove('hidden');
-                // Trigger reflow
-                void resultsSection.offsetWidth;
+                void resultsSection.offsetWidth; // trigger reflow
                 resultsSection.classList.remove('opacity-0', 'translate-y-4');
                 
                 switchTab('mismatch');
@@ -442,7 +443,7 @@
 
             } catch (error) {
                 console.error(error);
-                showNotification("Error", "Gagal membaca Excel.", true);
+                showNotification("Error", "Gagal memproses data. Pastikan format Excel sesuai.", true);
             } finally {
                 btn.classList.remove('opacity-80', 'cursor-not-allowed');
                 text.textContent = 'Mulai Analisis';
@@ -460,15 +461,20 @@
                 ['mismatch', 'match', 'only1', 'only2'].forEach(t => {
                     const el = document.getElementById(`tab-${t}`);
                     if(el) {
-                        el.classList.remove('bg-slate-700', 'border-slate-500');
-                        el.classList.add('bg-slate-800', 'border-slate-700');
+                        // Reset to inactive styles (Light Mode)
+                        el.classList.remove('bg-indigo-50', 'border-indigo-300', 'shadow-sm', 'bg-rose-50', 'border-rose-300', 'bg-emerald-50', 'border-emerald-300', 'bg-slate-50', 'border-slate-300');
+                        el.classList.add('bg-white', 'border-slate-200');
                     }
                 });
 
                 const activeEl = document.getElementById(`tab-${tabName}`);
                 if(activeEl) {
-                    activeEl.classList.add('bg-slate-700', 'border-slate-500');
-                    activeEl.classList.remove('bg-slate-800', 'border-slate-700');
+                    activeEl.classList.remove('bg-white', 'border-slate-200');
+                    // Add specific color tint based on tab
+                    if(tabName === 'mismatch') activeEl.classList.add('bg-rose-50', 'border-rose-300', 'shadow-sm');
+                    else if(tabName === 'match') activeEl.classList.add('bg-emerald-50', 'border-emerald-300', 'shadow-sm');
+                    else if(tabName === 'only1') activeEl.classList.add('bg-slate-50', 'border-slate-300', 'shadow-sm');
+                    else if(tabName === 'only2') activeEl.classList.add('bg-indigo-50', 'border-indigo-300', 'shadow-sm');
                 }
 
                 const missionPanel = document.getElementById('missionPanel');
@@ -487,34 +493,37 @@
         function renderDynamicControls() {
             const container = document.getElementById('dynamicControls');
             let html = '';
+            
+            const inputClass = "w-24 px-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-700 shadow-sm focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 outline-none";
+            const selectClass = "w-40 px-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-700 cursor-pointer shadow-sm hover:bg-slate-50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 outline-none pr-8";
 
             if (currentActiveTab === 'mismatch') {
                 html = `
                     <div class="flex gap-2">
-                        <input type="number" id="min1" placeholder="Min Stok D1" class="w-24 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200" oninput="updateMismatchFilter()">
-                        <input type="number" id="max1" placeholder="Max Stok D1" class="w-24 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200" oninput="updateMismatchFilter()">
+                        <input type="number" id="min1" placeholder="Min D1" class="${inputClass}" oninput="updateMismatchFilter()">
+                        <input type="number" id="max1" placeholder="Max D1" class="${inputClass}" oninput="updateMismatchFilter()">
                     </div>
                     <div class="flex gap-2">
-                        <input type="number" id="minAio" placeholder="Min Stok AIO" class="w-24 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200" oninput="updateMismatchFilter()">
-                        <input type="number" id="maxAio" placeholder="Max Stok AIO" class="w-24 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200" oninput="updateMismatchFilter()">
+                        <input type="number" id="minAio" placeholder="Min AIO" class="${inputClass}" oninput="updateMismatchFilter()">
+                        <input type="number" id="maxAio" placeholder="Max AIO" class="${inputClass}" oninput="updateMismatchFilter()">
                     </div>
                 `;
             } else if (currentActiveTab === 'only2') {
                 html = `
-                    <select id="filterCategory" onchange="handleOnly2Filters()" class="w-40 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200 cursor-pointer">
+                    <select id="filterCategory" onchange="handleOnly2Filters()" class="${selectClass}">
                         <option value="">Semua Kategori</option>
                         ${generateOptions('category')}
                     </select>
-                    <select id="filterBrand" onchange="handleOnly2Filters()" class="w-40 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200 cursor-pointer">
+                    <select id="filterBrand" onchange="handleOnly2Filters()" class="${selectClass}">
                         <option value="">Semua Merk</option>
                         ${generateOptions('brand')}
                     </select>
-                    <select id="sortOnly2" onchange="handleOnly2Filters()" class="w-32 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200 cursor-pointer">
+                    <select id="sortOnly2" onchange="handleOnly2Filters()" class="w-36 px-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-700 cursor-pointer shadow-sm hover:bg-slate-50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 outline-none pr-8">
                         <option value="">Urutkan Stok</option>
                         <option value="desc">Tinggi ke Rendah</option>
                         <option value="asc">Rendah ke Tinggi</option>
                     </select>
-                    <div class="bg-slate-700 text-slate-300 px-3 py-1.5 rounded border border-slate-600 text-xs font-semibold" id="badgeOnly2Count">0 Ditampilkan</div>
+                    <div class="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-md border border-indigo-200 text-xs font-semibold shadow-sm" id="badgeOnly2Count">0 Ditampilkan</div>
                 `;
             }
             container.innerHTML = html;
@@ -534,10 +543,8 @@
         function handleSearch() { globalSearchQuery = document.getElementById('searchInput').value.toLowerCase(); currentPage = 1; renderTable(); }
         function updateMismatchFilter() {
             activeFilters = {
-                min1: parseFloat(document.getElementById('min1').value),
-                max1: parseFloat(document.getElementById('max1').value),
-                minAio: parseFloat(document.getElementById('minAio').value),
-                maxAio: parseFloat(document.getElementById('maxAio').value)
+                min1: parseFloat(document.getElementById('min1').value), max1: parseFloat(document.getElementById('max1').value),
+                minAio: parseFloat(document.getElementById('minAio').value), maxAio: parseFloat(document.getElementById('maxAio').value)
             };
             currentPage = 1; renderTable();
         }
@@ -559,6 +566,7 @@
             const tbody = document.getElementById('tableBody');
             let data = comparisonResults[currentActiveTab] || [];
 
+            // Apply Global Search
             if (globalSearchQuery) {
                 data = data.filter(item => {
                     const skuMatch = String(item.sku || "").toLowerCase().includes(globalSearchQuery);
@@ -567,6 +575,7 @@
                 });
             }
 
+            // Apply Specific Filters
             if (currentActiveTab === 'mismatch') {
                 data = data.filter(item => {
                     let pass = true;
@@ -579,14 +588,8 @@
             }
 
             if (currentActiveTab === 'only2') {
-                if (only2Filters.category) data = data.filter(item => {
-                    let cat = String(item.category || "").trim() || "-";
-                    return cat === only2Filters.category;
-                });
-                if (only2Filters.brand) data = data.filter(item => {
-                    let br = String(item.brand || "").trim() || "-";
-                    return br === only2Filters.brand;
-                });
+                if (only2Filters.category) data = data.filter(item => String(item.category || "").trim() === only2Filters.category || (String(item.category || "").trim() === "" && only2Filters.category === "-"));
+                if (only2Filters.brand) data = data.filter(item => String(item.brand || "").trim() === only2Filters.brand || (String(item.brand || "").trim() === "" && only2Filters.brand === "-"));
                 if (only2Filters.sort === 'desc') data.sort((a,b) => b.stockAio - a.stockAio);
                 if (only2Filters.sort === 'asc') data.sort((a,b) => a.stockAio - b.stockAio);
                 
@@ -594,6 +597,7 @@
                 if(badge) badge.textContent = `${data.length} Ditampilkan`;
             }
 
+            // Empty State Handling
             if (data.length === 0) {
                 document.getElementById('emptyState').classList.remove('hidden');
                 document.getElementById('paginationBlock').classList.add('hidden');
@@ -602,6 +606,7 @@
                 document.getElementById('emptyState').classList.add('hidden');
             }
 
+            // Render Table Header
             let headersHtml = `<th class="px-5 py-3 font-semibold">Kode SKU</th>`;
             if (currentActiveTab !== 'only1') headersHtml += `<th class="px-5 py-3 font-semibold">Nama Produk</th>`;
             if (currentActiveTab === 'mismatch' || currentActiveTab === 'match') {
@@ -614,9 +619,10 @@
             headersHtml += `<th class="px-5 py-3 font-semibold text-right">Status</th>`;
             thead.innerHTML = headersHtml;
 
+            // Pagination Calculations
             const totalItems = data.length;
             const totalPages = Math.ceil(totalItems / itemsPerPage);
-            if(currentPage > totalPages) currentPage = totalPages;
+            if(currentPage > totalPages) currentPage = totalPages || 1;
             
             const startIdx = (currentPage - 1) * itemsPerPage;
             const endIdx = startIdx + itemsPerPage;
@@ -629,6 +635,7 @@
             document.getElementById('btnPrev').disabled = currentPage <= 1;
             document.getElementById('btnNext').disabled = currentPage >= totalPages;
 
+            // Render Table Body
             tbody.innerHTML = '';
             paginatedData.forEach(item => {
                 const tr = document.createElement('tr');
@@ -638,10 +645,10 @@
                 const safeName = String(item.name || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 
                 let html = `
-                    <td class="px-5 py-3 align-top pt-4">
-                        <div class="flex items-center gap-2 font-medium text-slate-200">
+                    <td class="px-5 py-4 align-top">
+                        <div class="flex items-center gap-2 font-semibold text-slate-700">
                             ${item.sku}
-                            <button onclick="copyToClipboard('${safeSku}', 'SKU')" class="text-slate-500 hover:text-blue-400 transition-colors" title="Salin SKU">
+                            <button onclick="copyToClipboard('${safeSku}', 'SKU')" class="text-slate-400 hover:text-indigo-500 hover:scale-110 transition-all" title="Salin SKU">
                                 <i class="ph-bold ph-copy text-base"></i>
                             </button>
                         </div>
@@ -650,12 +657,12 @@
                 if (currentActiveTab !== 'only1') {
                     let meta = '';
                     if(currentActiveTab === 'only2') {
-                        meta = `<div class="text-[10px] text-slate-500 mt-1 flex items-center gap-2"><span class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">${item.brand || '-'}</span> <span class="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">${item.category || '-'}</span></div>`;
+                        meta = `<div class="text-[10px] text-slate-500 mt-1.5 flex items-center gap-2"><span class="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">${item.brand || '-'}</span> <span class="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">${item.category || '-'}</span></div>`;
                     }
-                    html += `<td class="px-5 py-3 min-w-[280px] align-top pt-4">
-                        <div class="flex items-start gap-2">
-                            <div class="text-slate-300 break-words leading-relaxed text-sm" title="${item.name}">${item.name}</div>
-                            <button onclick="copyToClipboard('${safeName}', 'Nama Produk')" class="text-slate-500 hover:text-blue-400 transition-colors mt-0.5 shrink-0" title="Salin Nama Produk">
+                    html += `<td class="px-5 py-4 min-w-[300px] align-top">
+                        <div class="flex items-start gap-2 group">
+                            <div class="text-slate-700 break-words leading-relaxed text-sm font-medium" title="${item.name}">${item.name}</div>
+                            <button onclick="copyToClipboard('${safeName}', 'Nama Produk')" class="text-slate-300 opacity-0 group-hover:opacity-100 hover:text-indigo-500 hover:scale-110 transition-all mt-0.5 shrink-0" title="Salin Nama Produk">
                                 <i class="ph-bold ph-copy text-base"></i>
                             </button>
                         </div>
@@ -665,36 +672,40 @@
 
                 if (currentActiveTab === 'mismatch' || currentActiveTab === 'match') {
                     html += `
-                        <td class="px-5 py-3 text-center align-top pt-4"><span class="text-slate-300 font-semibold">${item.stock1}</span></td>
-                        <td class="px-5 py-3 text-center align-top pt-4"><span class="text-slate-300 font-semibold">${item.stockAio}</span></td>`;
+                        <td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stock1}</span></td>
+                        <td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stockAio}</span></td>`;
                 } else if (currentActiveTab === 'only1') {
-                    html += `<td class="px-5 py-3 text-center align-top pt-4"><span class="text-slate-300 font-semibold">${item.stock1}</span></td>`;
+                    html += `<td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stock1}</span></td>`;
                 } else if (currentActiveTab === 'only2') {
-                    html += `<td class="px-5 py-3 text-center align-top pt-4"><span class="text-slate-300 font-semibold">${item.stockAio}</span></td>`;
+                    html += `<td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stockAio}</span></td>`;
                 }
 
+                // Status Buttons
                 let statusHtml = '';
                 if (currentActiveTab === 'mismatch') {
-                    statusHtml = `<span class="inline-flex items-center px-2 py-1 bg-rose-500/10 text-rose-400 rounded text-xs font-semibold">Selisih</span>`;
+                    statusHtml = `<span class="inline-flex items-center px-2.5 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded text-xs font-semibold">Selisih</span>`;
                 } else if (currentActiveTab === 'match') {
-                    statusHtml = `<span class="inline-flex items-center px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded text-xs font-semibold">Sama</span>`;
+                    statusHtml = `<span class="inline-flex items-center px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded text-xs font-semibold">Sama</span>`;
                 } else if (currentActiveTab === 'only1') {
-                    statusHtml = `<span class="inline-flex items-center px-2 py-1 bg-slate-700 text-slate-300 rounded text-xs font-semibold">Data 1</span>`;
+                    statusHtml = `<span class="inline-flex items-center px-2.5 py-1 bg-slate-100 text-slate-600 border border-slate-200 rounded text-xs font-semibold">Data 1</span>`;
                 } else if (currentActiveTab === 'only2') {
                     if (savedUploadData[item.sku]) {
-                        statusHtml = `<button onclick="toggleUploadStatus('${safeSku}')" class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 px-3 py-1.5 rounded text-xs font-semibold transition-colors"><i class="ph-bold ph-check"></i> Selesai Upload</button>`;
+                        // Already Uploaded
+                        statusHtml = `<button onclick="toggleUploadStatus('${safeSku}')" class="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-rose-50 text-emerald-600 hover:text-rose-600 border border-emerald-200 hover:border-rose-200 px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm group"><i class="ph-bold ph-check group-hover:hidden"></i><i class="ph-bold ph-x hidden group-hover:block"></i> Batal</button>`;
                     } else if (selectedForMission.includes(item.sku)) {
+                        // Queued for Upload
                         statusHtml = `
-                        <div class="flex items-center justify-end">
-                            <button onclick="executeUpload('${safeSku}')" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-l text-xs font-semibold transition-colors z-10 flex items-center gap-1"><i class="ph-bold ph-rocket-launch"></i> Upload</button>
-                            <button onclick="queueMission('${safeSku}')" class="bg-slate-700 hover:bg-rose-500/80 text-slate-300 hover:text-white px-2 py-1.5 rounded-r text-xs transition-colors border-l border-slate-800"><i class="ph-bold ph-x"></i></button>
+                        <div class="flex items-center justify-end shadow-sm rounded-md">
+                            <button onclick="executeUpload('${safeSku}')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-l-md text-xs font-bold transition-colors z-10 flex items-center gap-1 border border-indigo-500"><i class="ph-bold ph-rocket-launch"></i> Upload!</button>
+                            <button onclick="queueMission('${safeSku}')" class="bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-500 px-2 py-1.5 rounded-r-md text-xs transition-colors border-y border-r border-slate-300"><i class="ph-bold ph-x"></i></button>
                         </div>`;
                     } else {
-                        statusHtml = `<button onclick="queueMission('${safeSku}')" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded text-xs font-semibold transition-colors">Tambah Antrean</button>`;
+                        // Not Queued
+                        statusHtml = `<button onclick="queueMission('${safeSku}')" class="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-300 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors shadow-sm">Tambah Target</button>`;
                     }
                 }
 
-                html += `<td class="px-5 py-3 text-right align-top pt-3.5">${statusHtml}</td>`;
+                html += `<td class="px-5 py-4 text-right align-top">${statusHtml}</td>`;
                 tr.innerHTML = html;
                 tbody.appendChild(tr);
             });
@@ -703,14 +714,15 @@
         function queueMission(sku) {
             const idx = selectedForMission.indexOf(sku);
             if (idx === -1) {
-                selectedForMission.push(sku);
+                selectedForMission.push(sku); // Add to queue
             } else {
-                selectedForMission.splice(idx, 1);
+                selectedForMission.splice(idx, 1); // Remove from queue
             }
             renderTable();
         }
 
         function executeUpload(sku) {
+            // Remove from waiting queue, add to uploaded storage
             selectedForMission = selectedForMission.filter(s => s !== sku); 
             savedUploadData[sku] = true;
             saveToLocal();
@@ -729,7 +741,7 @@
 
         function toggleUploadStatus(sku) {
             if (savedUploadData[sku]) {
-                delete savedUploadData[sku];
+                delete savedUploadData[sku]; // Remove from uploaded
                 saveToLocal();
                 updateMissionPanel();
                 renderTable();
@@ -749,18 +761,18 @@
             let slotsHtml = '';
             for(let i=0; i<dailyMissionTarget; i++) {
                 if(i < displayCount) {
-                    slotsHtml += `<div class="w-7 h-7 rounded slot-filled flex items-center justify-center border border-blue-400/50"><i class="ph-fill ph-star text-white text-xs"></i></div>`;
+                    slotsHtml += `<div class="w-7 h-7 rounded slot-filled flex items-center justify-center"><i class="ph-fill ph-star text-white text-xs drop-shadow-sm"></i></div>`;
                 } else {
-                    slotsHtml += `<div class="w-7 h-7 rounded bg-slate-900 border border-slate-700 flex items-center justify-center mission-slot"><i class="ph-fill ph-star text-slate-700 text-xs"></i></div>`;
+                    slotsHtml += `<div class="w-7 h-7 rounded bg-slate-100 border border-slate-200 flex items-center justify-center mission-slot shadow-inner"><i class="ph-fill ph-star text-slate-300 text-xs"></i></div>`;
                 }
             }
             slots.innerHTML = slotsHtml;
             textCount.textContent = count;
             
             if(displayCount === dailyMissionTarget) {
-                panel.classList.add('border-blue-500/50', 'shadow-[0_0_20px_rgba(59,130,246,0.15)]');
+                panel.classList.add('border-indigo-300', 'bg-indigo-50');
             } else {
-                panel.classList.remove('border-blue-500/50', 'shadow-[0_0_20px_rgba(59,130,246,0.15)]');
+                panel.classList.remove('border-indigo-300', 'bg-indigo-50');
             }
         }
 
@@ -782,7 +794,7 @@
 
         function fireConfettiSmall() {
              if(typeof confetti !== 'undefined') {
-                 confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, zIndex: 100, colors: ['#3b82f6', '#60a5fa', '#10b981'] });
+                 confetti({ particleCount: 40, spread: 50, origin: { y: 0.8 }, zIndex: 100, colors: ['#6366f1', '#818cf8', '#10b981'] });
              }
         }
 

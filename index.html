@@ -14,51 +14,45 @@
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #f8fafc; /* Slate 50 - Very soft pastel grey/blue */
-            color: #334155; /* Slate 700 */
+            background-color: #f8fafc; 
+            color: #334155; 
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Clean White Cards */
         .clean-card { 
             background-color: #ffffff;
-            border: 1px solid #e2e8f0; /* Slate 200 */
+            border: 1px solid #e2e8f0; 
             border-radius: 1rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             transition: all 0.2s ease-in-out;
         }
         
         .clean-card-hover:hover {
-            border-color: #cbd5e1; /* Slate 300 */
+            border-color: #cbd5e1; 
             transform: translateY(-2px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
         }
 
-        /* Table Styles Light */
-        .table-row { transition: background-color 0.15s; border-bottom: 1px solid #f1f5f9; /* Slate 100 */ }
-        .table-row:hover { background-color: #f8fafc; /* Slate 50 */ }
+        .table-row { transition: background-color 0.15s; border-bottom: 1px solid #f1f5f9; }
+        .table-row:hover { background-color: #f8fafc; }
         .table-row:last-child { border-bottom: none; }
         
-        /* Custom Scrollbar Soft */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Game UI Styles Pastel */
         .mission-slot { transition: all 0.3s ease; }
         .slot-filled { 
-            background-color: #6366f1; /* Indigo 500 */
+            background-color: #6366f1; 
             transform: scale(1.1); 
             box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
         }
         
-        /* Loader Light */
         .loader { border: 3px solid #e2e8f0; border-bottom-color: #6366f1; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Custom Select Input Style */
         select { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; }
     </style>
 </head>
@@ -72,94 +66,120 @@
                     <i class="ph-fill ph-sparkle text-indigo-500"></i> AIO Smart Sync
                 </div>
                 <h1 class="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight">Komparasi SKU & Stok</h1>
-                <p class="text-slate-500 mt-2 text-sm">Temukan selisih stok dan kelola target upload produk Anda dengan rapi dan mudah.</p>
+                <p class="text-slate-500 mt-2 text-sm">Temukan selisih stok, kelola produk terupload, dan cek produk discontinued.</p>
                 
-                <!-- Realtime Clock Display -->
+                <!-- Realtime Clock -->
                 <div class="flex items-center justify-center md:justify-start gap-2 text-xs font-medium text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm w-fit mt-3 mx-auto md:mx-0">
                     <i class="ph-bold ph-clock text-indigo-500"></i>
                     <span id="realtimeClock">Memuat waktu...</span>
                 </div>
             </div>
             
-            <button id="processBtn" onclick="mulaiKomparasi()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-indigo-200 transition-all active:scale-95 flex items-center gap-3">
+            <button id="processBtn" onclick="mulaiKomparasi()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-indigo-200 transition-all active:scale-95 flex items-center gap-3 shrink-0">
                 <i class="ph-bold ph-magic-wand text-xl"></i>
                 <span id="processText">Mulai Analisis</span>
                 <div id="processLoader" class="loader hidden"></div>
             </button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+        <!-- Upload Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
             <!-- Upload Data 1 -->
-            <div class="clean-card p-6 relative group">
-                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-database text-slate-400"></i> File Data 1</h3>
-                <p class="text-xs text-slate-500 mb-4">Mulai baris ke-7 | SKU (Kol 5 & 6) | Stok (Kol 9)</p>
-                
-                <label for="file1" class="flex flex-col items-center justify-center w-full h-28 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6" id="uploadState1">
-                        <i class="ph-bold ph-upload-simple text-2xl text-slate-400 mb-2"></i>
-                        <p class="text-sm font-medium text-slate-600">Pilih file Data 1</p>
+            <div class="clean-card p-5 relative group">
+                <h3 class="text-sm font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-database text-slate-400"></i> File Data 1</h3>
+                <p class="text-[11px] text-slate-500 mb-3">Mulai Baris 7 | SKU (Kol 6/5) | Stok (Kol 9)</p>
+                <label for="file1" class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div class="flex flex-col items-center justify-center pt-4 pb-4" id="uploadState1">
+                        <i class="ph-bold ph-upload-simple text-xl text-slate-400 mb-1"></i>
+                        <p class="text-xs font-medium text-slate-600">Pilih Data 1</p>
                     </div>
-                    <div id="successState1" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100">
-                        <i class="ph-fill ph-check-circle text-2xl text-emerald-500 mb-1"></i>
-                        <p id="filename1" class="text-sm font-semibold text-emerald-700 text-center px-4 truncate w-full"></p>
+                    <div id="successState1" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100 p-2">
+                        <i class="ph-fill ph-check-circle text-xl text-emerald-500 mb-1"></i>
+                        <p id="filename1" class="text-[11px] font-semibold text-emerald-700 text-center truncate w-full"></p>
                     </div>
                     <input id="file1" type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(this, 1)" />
                 </label>
             </div>
 
             <!-- Upload DATA AIO -->
-            <div class="clean-card p-6 relative group">
-                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-cube text-slate-400"></i> File DATA AIO</h3>
-                <p class="text-xs text-slate-500 mb-4">Mulai baris ke-2 | SKU (Kol 1) | Stok (Kol 13) | Kategori (5) | Merk (7)</p>
-                
-                <label for="fileAio" class="flex flex-col items-center justify-center w-full h-28 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6" id="uploadStateAio">
-                        <i class="ph-bold ph-upload-simple text-2xl text-slate-400 mb-2"></i>
-                        <p class="text-sm font-medium text-slate-600">Pilih file DATA AIO</p>
+            <div class="clean-card p-5 relative group">
+                <h3 class="text-sm font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-cube text-slate-400"></i> File DATA AIO</h3>
+                <p class="text-[11px] text-slate-500 mb-3">Mulai Baris 2 | SKU (Kol 1) | Stok (Kol 13)</p>
+                <label for="fileAio" class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div class="flex flex-col items-center justify-center pt-4 pb-4" id="uploadStateAio">
+                        <i class="ph-bold ph-upload-simple text-xl text-slate-400 mb-1"></i>
+                        <p class="text-xs font-medium text-slate-600">Pilih DATA AIO</p>
                     </div>
-                    <div id="successStateAio" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100">
-                        <i class="ph-fill ph-check-circle text-2xl text-emerald-500 mb-1"></i>
-                        <p id="filenameAio" class="text-sm font-semibold text-emerald-700 text-center px-4 truncate w-full"></p>
+                    <div id="successStateAio" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100 p-2">
+                        <i class="ph-fill ph-check-circle text-xl text-emerald-500 mb-1"></i>
+                        <p id="filenameAio" class="text-[11px] font-semibold text-emerald-700 text-center truncate w-full"></p>
                     </div>
                     <input id="fileAio" type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(this, 'Aio')" />
                 </label>
             </div>
+
+            <!-- Upload DATA 3 -->
+            <div class="clean-card p-5 relative group">
+                <h3 class="text-sm font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-prohibit text-slate-400"></i> File Data 3 (Discontinued)</h3>
+                <p class="text-[11px] text-slate-500 mb-3">Opsional | Mulai Baris 2 | SKU (Kol 1)</p>
+                <label for="file3" class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div class="flex flex-col items-center justify-center pt-4 pb-4" id="uploadState3">
+                        <i class="ph-bold ph-upload-simple text-xl text-slate-400 mb-1"></i>
+                        <p class="text-xs font-medium text-slate-600">Pilih Data 3</p>
+                    </div>
+                    <div id="successState3" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100 p-2">
+                        <i class="ph-fill ph-check-circle text-xl text-emerald-500 mb-1"></i>
+                        <p id="filename3" class="text-[11px] font-semibold text-emerald-700 text-center truncate w-full"></p>
+                    </div>
+                    <input id="file3" type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(this, 3)" />
+                </label>
+            </div>
         </div>
 
-        <div id="summaryCards" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 hidden">
-            <!-- Card 1: Selisih -->
-            <div onclick="switchTab('mismatch')" id="tab-mismatch" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4 transition-all">
-                <div class="p-3 bg-rose-100 rounded-lg text-rose-500"><i class="ph-bold ph-scales text-xl"></i></div>
+        <!-- Tab Summary Cards -->
+        <div id="summaryCards" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8 hidden">
+            <!-- Selisih -->
+            <div onclick="switchTab('mismatch')" id="tab-mismatch" class="clean-card clean-card-hover p-4 cursor-pointer flex items-center gap-3 transition-all">
+                <div class="p-2.5 bg-rose-100 rounded-lg text-rose-500"><i class="ph-bold ph-scales text-lg"></i></div>
                 <div>
-                    <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wide">Selisih Stok</p>
-                    <h4 class="text-2xl font-bold text-slate-800" id="countMismatch">0</h4>
+                    <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Selisih Stok</p>
+                    <h4 class="text-xl font-bold text-slate-800" id="countMismatch">0</h4>
                 </div>
             </div>
             
-            <!-- Card 2: Match -->
-            <div onclick="switchTab('match')" id="tab-match" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4 transition-all">
-                <div class="p-3 bg-emerald-100 rounded-lg text-emerald-600"><i class="ph-bold ph-check-square-offset text-xl"></i></div>
+            <!-- Match -->
+            <div onclick="switchTab('match')" id="tab-match" class="clean-card clean-card-hover p-4 cursor-pointer flex items-center gap-3 transition-all">
+                <div class="p-2.5 bg-emerald-100 rounded-lg text-emerald-600"><i class="ph-bold ph-check-square-offset text-lg"></i></div>
                 <div>
-                    <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wide">Stok Sama</p>
-                    <h4 class="text-2xl font-bold text-slate-800" id="countMatch">0</h4>
+                    <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Stok Sama</p>
+                    <h4 class="text-xl font-bold text-slate-800" id="countMatch">0</h4>
                 </div>
             </div>
 
-            <!-- Card 3: Only Data 1 -->
-            <div onclick="switchTab('only1')" id="tab-only1" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4 transition-all">
-                <div class="p-3 bg-slate-100 rounded-lg text-slate-500"><i class="ph-bold ph-database text-xl"></i></div>
+            <!-- Only Data 1 -->
+            <div onclick="switchTab('only1')" id="tab-only1" class="clean-card clean-card-hover p-4 cursor-pointer flex items-center gap-3 transition-all">
+                <div class="p-2.5 bg-slate-100 rounded-lg text-slate-500"><i class="ph-bold ph-database text-lg"></i></div>
                 <div>
-                    <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wide">Hanya Data 1</p>
-                    <h4 class="text-2xl font-bold text-slate-800" id="countOnly1">0</h4>
+                    <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Hanya Data 1</p>
+                    <h4 class="text-xl font-bold text-slate-800" id="countOnly1">0</h4>
                 </div>
             </div>
 
-            <!-- Card 4: Unuploaded -->
-            <div onclick="switchTab('only2')" id="tab-only2" class="clean-card clean-card-hover p-5 cursor-pointer flex items-center gap-4 transition-all">
-                <div class="p-3 bg-indigo-100 rounded-lg text-indigo-500"><i class="ph-bold ph-cloud-arrow-up text-xl"></i></div>
+            <!-- Unuploaded -->
+            <div onclick="switchTab('only2')" id="tab-only2" class="clean-card clean-card-hover p-4 cursor-pointer flex items-center gap-3 transition-all">
+                <div class="p-2.5 bg-indigo-100 rounded-lg text-indigo-500"><i class="ph-bold ph-cloud-arrow-up text-lg"></i></div>
                 <div>
-                    <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wide whitespace-nowrap">Produk Belum Terupload</p>
-                    <h4 class="text-2xl font-bold text-slate-800" id="countOnly2">0</h4>
+                    <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Blm Terupload</p>
+                    <h4 class="text-xl font-bold text-slate-800" id="countOnly2">0</h4>
+                </div>
+            </div>
+
+            <!-- Discontinued -->
+            <div onclick="switchTab('discontinued')" id="tab-discontinued" class="clean-card clean-card-hover p-4 cursor-pointer flex items-center gap-3 transition-all col-span-2 md:col-span-1">
+                <div class="p-2.5 bg-amber-100 rounded-lg text-amber-500"><i class="ph-bold ph-prohibit text-lg"></i></div>
+                <div>
+                    <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Discontinued</p>
+                    <h4 class="text-xl font-bold text-slate-800" id="countDiscontinued">0</h4>
                 </div>
             </div>
         </div>
@@ -168,15 +188,21 @@
             <!-- Header Filter Bar -->
             <div class="p-4 border-b border-slate-200 bg-slate-50/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 
-                <!-- Global Search -->
-                <div class="relative w-full md:w-80 text-slate-600">
-                    <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari SKU atau Nama Produk..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 text-sm placeholder-slate-400 transition-colors shadow-sm">
+                <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                    <!-- Global Search -->
+                    <div class="relative w-full md:w-80 text-slate-600">
+                        <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari SKU atau Nama Produk..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 text-sm placeholder-slate-400 transition-colors shadow-sm">
+                    </div>
+                    <!-- Export Excel -->
+                    <button onclick="downloadExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm shrink-0">
+                        <i class="ph-bold ph-file-xls text-lg"></i> Download Excel
+                    </button>
                 </div>
 
                 <!-- Dynamic Controls based on Tab -->
                 <div id="dynamicControls" class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                    <!-- Placeholder for dynamic filters -->
+                    <!-- Placeholder -->
                 </div>
             </div>
 
@@ -209,7 +235,7 @@
                     <i class="ph-fill ph-ghost text-3xl"></i>
                 </div>
                 <p class="text-slate-700 font-medium">Tidak ada data yang ditemukan.</p>
-                <p class="text-slate-500 text-xs mt-1">Coba sesuaikan filter pencarian Anda.</p>
+                <p class="text-slate-500 text-xs mt-1">Data kosong atau coba sesuaikan filter pencarian.</p>
             </div>
         </div>
     </div>
@@ -242,7 +268,7 @@
                 <div id="missionSlots" class="flex items-center gap-1.5">
                     <!-- Slots injected by JS -->
                 </div>
-                <!-- Duration tracker display -->
+                <!-- Duration tracker -->
                 <div id="uploadDurationTxt" class="text-[10px] text-slate-400 mt-1.5 font-medium tracking-wide">
                     Belum ada aktivitas
                 </div>
@@ -255,7 +281,7 @@
 
     <script>
         // Global State
-        let comparisonResults = { mismatch: [], match: [], only1: [], only2: [] };
+        let comparisonResults = { mismatch: [], match: [], only1: [], only2: [], discontinued: [] };
         let currentActiveTab = 'mismatch';
         
         let activeFilters = { min1: null, max1: null, minAio: null, maxAio: null };
@@ -265,13 +291,11 @@
         let currentPage = 1;
         const itemsPerPage = 100;
 
-        // Game / App State
+        // App State
         const dailyMissionTarget = 5;
         let selectedForMission = [];
         let savedUploadData = {}; 
-        
-        // Smart Timing State
-        let queueTimestamps = {}; // Untuk menyimpan waktu saat di klik tambah target
+        let queueTimestamps = {}; 
         let lastDurationRecord = "-";
 
         window.onload = function() {
@@ -283,16 +307,7 @@
             const clockEl = document.getElementById('realtimeClock');
             setInterval(() => {
                 const now = new Date();
-                const options = { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric', 
-                    hour: '2-digit', 
-                    minute: '2-digit', 
-                    second: '2-digit',
-                    timeZoneName: 'short'
-                };
+                const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
                 clockEl.textContent = now.toLocaleDateString('id-ID', options).replace(/\./g, ':');
             }, 1000);
         }
@@ -300,7 +315,6 @@
         function initLocalStorage() {
             const today = new Date().toISOString().split('T')[0]; 
             const storedData = localStorage.getItem('aioUploadDataV2');
-            
             if (storedData) {
                 try {
                     const parsed = JSON.parse(storedData);
@@ -310,11 +324,7 @@
                         savedUploadData = {};
                         saveToLocal();
                     }
-                } catch(e) {
-                    savedUploadData = {};
-                }
-            } else {
-                savedUploadData = {};
+                } catch(e) { savedUploadData = {}; }
             }
         }
 
@@ -333,9 +343,10 @@
         function handleFileUpload(input, type) {
             const file = input.files[0];
             if (file) {
-                const uploadState = document.getElementById(type === 1 ? 'uploadState1' : 'uploadStateAio');
-                const successState = document.getElementById(type === 1 ? 'successState1' : 'successStateAio');
-                const filenameText = document.getElementById(type === 1 ? 'filename1' : 'filenameAio');
+                const mapType = type === 1 ? '1' : (type === 3 ? '3' : 'Aio');
+                const uploadState = document.getElementById(`uploadState${mapType}`);
+                const successState = document.getElementById(`successState${mapType}`);
+                const filenameText = document.getElementById(`filename${mapType}`);
                 
                 filenameText.textContent = file.name;
                 uploadState.classList.add('hidden');
@@ -348,14 +359,8 @@
             const notif = document.getElementById('notification');
             document.getElementById('notifTitle').textContent = title;
             document.getElementById('notifText').textContent = text;
-            
             const icon = document.getElementById('notifIcon');
-            if(isWarning) {
-                icon.className = 'ph-fill ph-warning-circle text-xl text-rose-500';
-            } else {
-                icon.className = 'ph-fill ph-check-circle text-xl text-emerald-500';
-            }
-
+            icon.className = isWarning ? 'ph-fill ph-warning-circle text-xl text-rose-500' : 'ph-fill ph-check-circle text-xl text-emerald-500';
             notif.classList.remove('translate-x-[200%]', 'opacity-0');
             setTimeout(() => { notif.classList.add('translate-x-[200%]', 'opacity-0'); }, 3000);
         }
@@ -385,9 +390,7 @@
                         const worksheet = workbook.Sheets[firstSheetName];
                         const json = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ""});
                         resolve(json.slice(startRow - 1));
-                    } catch(err) {
-                        reject(err);
-                    }
+                    } catch(err) { reject(err); }
                 };
                 reader.onerror = reject;
                 reader.readAsArrayBuffer(file);
@@ -397,9 +400,10 @@
         async function mulaiKomparasi() {
             const file1 = document.getElementById('file1').files[0];
             const fileAio = document.getElementById('fileAio').files[0];
+            const file3 = document.getElementById('file3').files[0];
 
             if (!file1 || !fileAio) {
-                showNotification("File Kurang", "Harap unggah Data 1 & DATA AIO.", true);
+                showNotification("File Kurang", "Harap unggah minimal Data 1 & DATA AIO.", true);
                 return;
             }
 
@@ -413,19 +417,16 @@
             try {
                 const data1 = await readExcel(file1, 7);
                 const dataAio = await readExcel(fileAio, 2);
+                let data3 = [];
+                if (file3) data3 = await readExcel(file3, 2);
 
                 const map1 = new Map();
                 data1.forEach(row => {
-                    // PERBAIKAN: Tidak lagi menggabungkan secara buta. 
-                    // Prioritas mengambil SKU dari Kolom 6 (indeks 5). Jika kosong, ambil dari Kolom 5 (indeks 4).
                     let sku5 = String(row[4] || "").trim();
                     let sku6 = String(row[5] || "").trim();
-                    let sku = sku6 !== "" ? sku6 : sku5;
-
+                    let sku = sku6 !== "" ? sku6 : sku5; 
                     let stock = parseFloat(row[8]);
                     stock = isNaN(stock) ? 0 : stock;
-                    
-                    // Memastikan SKU benar-benar valid dan mengabaikan baris kosong di Excel
                     if(sku !== "" && sku !== "undefined" && sku !== "0") { 
                         map1.set(sku, { stock: stock });
                     }
@@ -439,16 +440,26 @@
                     let brand = String(row[6] || "").trim() || "-";
                     let stock = parseFloat(row[12]);
                     stock = isNaN(stock) ? 0 : stock;
-                    
-                    // Memastikan SKU benar-benar valid dan mengabaikan baris kosong di Excel
                     if(sku !== "" && sku !== "undefined" && sku !== "0") { 
                         mapAio.set(sku, { stock, name, category, brand });
                     }
                 });
 
-                comparisonResults = { mismatch: [], match: [], only1: [], only2: [] };
+                const map3 = new Map();
+                data3.forEach(row => {
+                    let sku = String(row[0] || "").trim();
+                    let name = String(row[2] || "").trim() || "-";
+                    let stock = parseFloat(row[12]);
+                    stock = isNaN(stock) ? 0 : stock;
+                    if(sku !== "" && sku !== "undefined" && sku !== "0") { 
+                        map3.set(sku, { stock, name });
+                    }
+                });
+
+                comparisonResults = { mismatch: [], match: [], only1: [], only2: [], discontinued: [] };
 
                 map1.forEach((val1, sku) => {
+                    // Check Match / Mismatch
                     if(mapAio.has(sku)) {
                         let valAio = mapAio.get(sku);
                         if(val1.stock === valAio.stock) {
@@ -459,16 +470,20 @@
                     } else {
                         comparisonResults.only1.push({sku, stock1: val1.stock});
                     }
+
+                    // Check Discontinued
+                    if (map3.has(sku)) {
+                        let val3 = map3.get(sku);
+                        comparisonResults.discontinued.push({
+                            sku, name: val3.name, stock1: val1.stock, stock3: val3.stock
+                        });
+                    }
                 });
 
                 mapAio.forEach((valAio, sku) => {
                     if(!map1.has(sku)) {
                         comparisonResults.only2.push({
-                            sku, 
-                            name: valAio.name, 
-                            stockAio: valAio.stock,
-                            category: valAio.category,
-                            brand: valAio.brand
+                            sku, name: valAio.name, stockAio: valAio.stock, category: valAio.category, brand: valAio.brand
                         });
                     }
                 });
@@ -477,17 +492,18 @@
                 document.getElementById('countMatch').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.match.length);
                 document.getElementById('countOnly1').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.only1.length);
                 document.getElementById('countOnly2').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.only2.length);
+                document.getElementById('countDiscontinued').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.discontinued.length);
 
                 updateMissionPanel();
                 document.getElementById('summaryCards').classList.remove('hidden');
                 
                 const resultsSection = document.getElementById('resultsSection');
                 resultsSection.classList.remove('hidden');
-                void resultsSection.offsetWidth; // trigger reflow
+                void resultsSection.offsetWidth; 
                 resultsSection.classList.remove('opacity-0', 'translate-y-4');
                 
                 switchTab('mismatch');
-                showNotification("Selesai", "Data berhasil dikomparasi.");
+                showNotification("Selesai", "Data berhasil diproses.");
 
             } catch (error) {
                 console.error(error);
@@ -506,11 +522,10 @@
                 document.getElementById('searchInput').value = '';
                 globalSearchQuery = '';
 
-                ['mismatch', 'match', 'only1', 'only2'].forEach(t => {
+                ['mismatch', 'match', 'only1', 'only2', 'discontinued'].forEach(t => {
                     const el = document.getElementById(`tab-${t}`);
                     if(el) {
-                        // Reset to inactive styles (Light Mode)
-                        el.classList.remove('bg-indigo-50', 'border-indigo-300', 'shadow-sm', 'bg-rose-50', 'border-rose-300', 'bg-emerald-50', 'border-emerald-300', 'bg-slate-50', 'border-slate-300');
+                        el.classList.remove('bg-rose-50', 'border-rose-300', 'shadow-sm', 'bg-emerald-50', 'border-emerald-300', 'bg-slate-50', 'border-slate-300', 'bg-indigo-50', 'border-indigo-300', 'bg-amber-50', 'border-amber-300');
                         el.classList.add('bg-white', 'border-slate-200');
                     }
                 });
@@ -518,11 +533,11 @@
                 const activeEl = document.getElementById(`tab-${tabName}`);
                 if(activeEl) {
                     activeEl.classList.remove('bg-white', 'border-slate-200');
-                    // Add specific color tint based on tab
                     if(tabName === 'mismatch') activeEl.classList.add('bg-rose-50', 'border-rose-300', 'shadow-sm');
                     else if(tabName === 'match') activeEl.classList.add('bg-emerald-50', 'border-emerald-300', 'shadow-sm');
                     else if(tabName === 'only1') activeEl.classList.add('bg-slate-50', 'border-slate-300', 'shadow-sm');
                     else if(tabName === 'only2') activeEl.classList.add('bg-indigo-50', 'border-indigo-300', 'shadow-sm');
+                    else if(tabName === 'discontinued') activeEl.classList.add('bg-amber-50', 'border-amber-300', 'shadow-sm');
                 }
 
                 const missionPanel = document.getElementById('missionPanel');
@@ -541,7 +556,6 @@
         function renderDynamicControls() {
             const container = document.getElementById('dynamicControls');
             let html = '';
-            
             const inputClass = "w-24 px-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-700 shadow-sm focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 outline-none";
             const selectClass = "w-40 px-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-700 cursor-pointer shadow-sm hover:bg-slate-50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 outline-none pr-8";
 
@@ -584,8 +598,7 @@
                 if(val === "") val = "-";
                 counts[val] = (counts[val] || 0) + 1;
             });
-            let opts = Object.keys(counts).sort().map(val => `<option value="${val}">${val} (${counts[val]})</option>`);
-            return opts.join('');
+            return Object.keys(counts).sort().map(val => `<option value="${val}">${val} (${counts[val]})</option>`).join('');
         }
 
         function handleSearch() { globalSearchQuery = document.getElementById('searchInput').value.toLowerCase(); currentPage = 1; renderTable(); }
@@ -609,21 +622,13 @@
         function nextPage() { currentPage++; renderTable(); scrollToTable(); }
         function scrollToTable() { document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 
-        function renderTable() {
-            const thead = document.getElementById('tableHead');
-            const tbody = document.getElementById('tableBody');
+        function getFilteredData() {
             let data = comparisonResults[currentActiveTab] || [];
-
-            // Apply Global Search
             if (globalSearchQuery) {
                 data = data.filter(item => {
-                    const skuMatch = String(item.sku || "").toLowerCase().includes(globalSearchQuery);
-                    const nameMatch = String(item.name || "").toLowerCase().includes(globalSearchQuery);
-                    return skuMatch || nameMatch;
+                    return String(item.sku || "").toLowerCase().includes(globalSearchQuery) || String(item.name || "").toLowerCase().includes(globalSearchQuery);
                 });
             }
-
-            // Apply Specific Filters
             if (currentActiveTab === 'mismatch') {
                 data = data.filter(item => {
                     let pass = true;
@@ -634,18 +639,25 @@
                     return pass;
                 });
             }
-
             if (currentActiveTab === 'only2') {
                 if (only2Filters.category) data = data.filter(item => String(item.category || "").trim() === only2Filters.category || (String(item.category || "").trim() === "" && only2Filters.category === "-"));
                 if (only2Filters.brand) data = data.filter(item => String(item.brand || "").trim() === only2Filters.brand || (String(item.brand || "").trim() === "" && only2Filters.brand === "-"));
                 if (only2Filters.sort === 'desc') data.sort((a,b) => b.stockAio - a.stockAio);
                 if (only2Filters.sort === 'asc') data.sort((a,b) => a.stockAio - b.stockAio);
-                
+            }
+            return data;
+        }
+
+        function renderTable() {
+            const thead = document.getElementById('tableHead');
+            const tbody = document.getElementById('tableBody');
+            let data = getFilteredData();
+
+            if (currentActiveTab === 'only2') {
                 const badge = document.getElementById('badgeOnly2Count');
                 if(badge) badge.textContent = `${data.length} Ditampilkan`;
             }
 
-            // Empty State Handling
             if (data.length === 0) {
                 document.getElementById('emptyState').classList.remove('hidden');
                 document.getElementById('paginationBlock').classList.add('hidden');
@@ -654,15 +666,18 @@
                 document.getElementById('emptyState').classList.add('hidden');
             }
 
-            // Render Table Header
+            // Headers
             let headersHtml = `<th class="px-5 py-3 font-semibold">Kode SKU</th>`;
             if (currentActiveTab !== 'only1') headersHtml += `<th class="px-5 py-3 font-semibold">Nama Produk</th>`;
+            
             if (currentActiveTab === 'mismatch' || currentActiveTab === 'match') {
                 headersHtml += `<th class="px-5 py-3 font-semibold text-center w-24">Data 1</th><th class="px-5 py-3 font-semibold text-center w-24">AIO</th>`;
             } else if (currentActiveTab === 'only1') {
                 headersHtml += `<th class="px-5 py-3 font-semibold text-center w-24">Stok D1</th>`;
             } else if (currentActiveTab === 'only2') {
                 headersHtml += `<th class="px-5 py-3 font-semibold text-center w-24">Stok AIO</th>`;
+            } else if (currentActiveTab === 'discontinued') {
+                headersHtml += `<th class="px-5 py-3 font-semibold text-center w-24">Stok D1</th><th class="px-5 py-3 font-semibold text-center w-24">Stok D3</th>`;
             }
             headersHtml += `<th class="px-5 py-3 font-semibold text-right">Status</th>`;
             thead.innerHTML = headersHtml;
@@ -671,7 +686,6 @@
             const totalItems = data.length;
             const totalPages = Math.ceil(totalItems / itemsPerPage);
             if(currentPage > totalPages) currentPage = totalPages || 1;
-            
             const startIdx = (currentPage - 1) * itemsPerPage;
             const endIdx = startIdx + itemsPerPage;
             const paginatedData = data.slice(startIdx, endIdx);
@@ -683,7 +697,7 @@
             document.getElementById('btnPrev').disabled = currentPage <= 1;
             document.getElementById('btnNext').disabled = currentPage >= totalPages;
 
-            // Render Table Body
+            // Render Rows
             tbody.innerHTML = '';
             paginatedData.forEach(item => {
                 const tr = document.createElement('tr');
@@ -696,7 +710,7 @@
                     <td class="px-5 py-4 align-top">
                         <div class="flex items-center gap-2 font-semibold text-slate-700">
                             ${item.sku}
-                            <button onclick="copyToClipboard('${safeSku}', 'SKU')" class="text-slate-400 hover:text-indigo-500 hover:scale-110 transition-all" title="Salin SKU">
+                            <button onclick="copyToClipboard('${safeSku}', 'SKU')" class="text-slate-400 hover:text-indigo-500 transition-all" title="Salin SKU">
                                 <i class="ph-bold ph-copy text-base"></i>
                             </button>
                         </div>
@@ -710,7 +724,7 @@
                     html += `<td class="px-5 py-4 min-w-[300px] align-top">
                         <div class="flex items-start gap-2 group">
                             <div class="text-slate-700 break-words leading-relaxed text-sm font-medium" title="${item.name}">${item.name}</div>
-                            <button onclick="copyToClipboard('${safeName}', 'Nama Produk')" class="text-slate-300 opacity-0 group-hover:opacity-100 hover:text-indigo-500 hover:scale-110 transition-all mt-0.5 shrink-0" title="Salin Nama Produk">
+                            <button onclick="copyToClipboard('${safeName}', 'Nama Produk')" class="text-slate-300 opacity-0 group-hover:opacity-100 hover:text-indigo-500 transition-all mt-0.5 shrink-0" title="Salin Nama Produk">
                                 <i class="ph-bold ph-copy text-base"></i>
                             </button>
                         </div>
@@ -719,13 +733,15 @@
                 }
 
                 if (currentActiveTab === 'mismatch' || currentActiveTab === 'match') {
-                    html += `
-                        <td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stock1}</span></td>
-                        <td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stockAio}</span></td>`;
+                    html += `<td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stock1}</span></td>
+                             <td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stockAio}</span></td>`;
                 } else if (currentActiveTab === 'only1') {
                     html += `<td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stock1}</span></td>`;
                 } else if (currentActiveTab === 'only2') {
                     html += `<td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stockAio}</span></td>`;
+                } else if (currentActiveTab === 'discontinued') {
+                    html += `<td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stock1}</span></td>
+                             <td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded">${item.stock3}</span></td>`;
                 }
 
                 // Status Buttons
@@ -736,23 +752,20 @@
                     statusHtml = `<span class="inline-flex items-center px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded text-xs font-semibold">Sama</span>`;
                 } else if (currentActiveTab === 'only1') {
                     statusHtml = `<span class="inline-flex items-center px-2.5 py-1 bg-slate-100 text-slate-600 border border-slate-200 rounded text-xs font-semibold">Data 1</span>`;
+                } else if (currentActiveTab === 'discontinued') {
+                    statusHtml = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded text-xs font-semibold"><i class="ph-bold ph-prohibit"></i> Discontinued</span>`;
                 } else if (currentActiveTab === 'only2') {
                     if (savedUploadData[item.sku]) {
-                        // Already Uploaded
-                        statusHtml = `
-                        <button onclick="toggleUploadStatus('${safeSku}')" class="inline-flex items-center justify-center gap-1.5 bg-emerald-50 hover:bg-rose-50 text-emerald-600 hover:text-rose-600 border border-emerald-200 hover:border-rose-200 px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm group w-36">
+                        statusHtml = `<button onclick="toggleUploadStatus('${safeSku}')" class="inline-flex items-center justify-center gap-1.5 bg-emerald-50 hover:bg-rose-50 text-emerald-600 hover:text-rose-600 border border-emerald-200 hover:border-rose-200 px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm group w-36">
                             <span class="inline-flex items-center gap-1 group-hover:hidden"><i class="ph-bold ph-check"></i> Sudah Terupload</span>
                             <span class="hidden group-hover:inline-flex items-center gap-1"><i class="ph-bold ph-x"></i> Batal</span>
                         </button>`;
                     } else if (selectedForMission.includes(item.sku)) {
-                        // Queued for Upload
-                        statusHtml = `
-                        <div class="flex items-center justify-end shadow-sm rounded-md">
+                        statusHtml = `<div class="flex items-center justify-end shadow-sm rounded-md">
                             <button onclick="executeUpload('${safeSku}')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-l-md text-xs font-bold transition-colors z-10 flex items-center gap-1 border border-indigo-500"><i class="ph-bold ph-rocket-launch"></i> Upload!</button>
                             <button onclick="queueMission('${safeSku}')" class="bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-500 px-2 py-1.5 rounded-r-md text-xs transition-colors border-y border-r border-slate-300"><i class="ph-bold ph-x"></i></button>
                         </div>`;
                     } else {
-                        // Not Queued
                         statusHtml = `<button onclick="queueMission('${safeSku}')" class="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-300 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors shadow-sm">Tambah Target</button>`;
                     }
                 }
@@ -761,6 +774,47 @@
                 tr.innerHTML = html;
                 tbody.appendChild(tr);
             });
+        }
+
+        // --- Export to Excel Feature ---
+        function downloadExcel() {
+            const data = getFilteredData();
+            if (data.length === 0) {
+                showNotification("Kosong", "Tidak ada data untuk diekspor", true);
+                return;
+            }
+
+            let exportData = data.map(item => {
+                let row = { "Kode SKU": item.sku };
+                if (currentActiveTab !== 'only1') row["Nama Produk"] = item.name;
+
+                if (currentActiveTab === 'mismatch' || currentActiveTab === 'match') {
+                    row["Stok Data 1"] = item.stock1;
+                    row["Stok AIO"] = item.stockAio;
+                    row["Selisih"] = item.stock1 - item.stockAio;
+                } else if (currentActiveTab === 'only1') {
+                    row["Stok Data 1"] = item.stock1;
+                } else if (currentActiveTab === 'only2') {
+                    row["Stok AIO"] = item.stockAio;
+                    row["Kategori"] = item.category || "-";
+                    row["Merk"] = item.brand || "-";
+                    row["Status"] = savedUploadData[item.sku] ? "Sudah Terupload" : "Belum Terupload";
+                } else if (currentActiveTab === 'discontinued') {
+                    row["Stok Data 1"] = item.stock1;
+                    row["Stok Data 3"] = item.stock3;
+                    row["Status"] = "Discontinued";
+                }
+                return row;
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan Data");
+
+            let tabNames = { 'mismatch': 'Selisih_Stok', 'match': 'Stok_Sama', 'only1': 'Hanya_Data_1', 'only2': 'Belum_Terupload', 'discontinued': 'Discontinued' };
+            let fileName = `Laporan_${tabNames[currentActiveTab]}_${new Date().getTime()}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            showNotification("Berhasil", "File Excel berhasil diunduh.");
         }
 
         function formatDuration(ms) {
@@ -775,24 +829,22 @@
         function queueMission(sku) {
             const idx = selectedForMission.indexOf(sku);
             if (idx === -1) {
-                selectedForMission.push(sku); // Add to queue
-                queueTimestamps[sku] = Date.now(); // Record the exact time we queue it
+                selectedForMission.push(sku);
+                queueTimestamps[sku] = Date.now();
             } else {
-                selectedForMission.splice(idx, 1); // Remove from queue
-                delete queueTimestamps[sku]; // Delete timestamp record
+                selectedForMission.splice(idx, 1);
+                delete queueTimestamps[sku];
             }
             renderTable();
         }
 
         function executeUpload(sku) {
-            // Calculate timing before deleting the reference
             const clickTime = Date.now();
             if (queueTimestamps[sku]) {
                 const durationMs = clickTime - queueTimestamps[sku];
                 lastDurationRecord = "Durasi Upload: " + formatDuration(durationMs);
             }
 
-            // Remove from waiting queue, add to uploaded storage
             selectedForMission = selectedForMission.filter(s => s !== sku); 
             delete queueTimestamps[sku];
             savedUploadData[sku] = true;
@@ -804,7 +856,7 @@
             
             if (count > 0 && count % dailyMissionTarget === 0) {
                 fireConfetti();
-                showNotification("Misi Selesai!", `Mantap! Anda telah mencapai target ${dailyMissionTarget} produk.`);
+                showNotification("Misi Selesai!", `Mantap! Anda mencapai target ${dailyMissionTarget} produk.`);
             } else {
                 fireConfettiSmall();
             }
@@ -812,7 +864,7 @@
 
         function toggleUploadStatus(sku) {
             if (savedUploadData[sku]) {
-                delete savedUploadData[sku]; // Remove from uploaded
+                delete savedUploadData[sku];
                 saveToLocal();
                 updateMissionPanel();
                 renderTable();
@@ -833,7 +885,6 @@
             let slotsHtml = '';
             for(let i=0; i<dailyMissionTarget; i++) {
                 if(i < displayCount) {
-                    // Make the star yellow specifically as requested
                     slotsHtml += `<div class="w-7 h-7 rounded slot-filled flex items-center justify-center"><i class="ph-fill ph-star text-yellow-400 text-sm drop-shadow-sm"></i></div>`;
                 } else {
                     slotsHtml += `<div class="w-7 h-7 rounded bg-slate-100 border border-slate-200 flex items-center justify-center mission-slot shadow-inner"><i class="ph-fill ph-star text-slate-300 text-xs"></i></div>`;
@@ -842,7 +893,6 @@
             slots.innerHTML = slotsHtml;
             textCount.textContent = count;
             
-            // Show real-time duration calc text
             if (lastDurationRecord !== "-") {
                 durationTxt.textContent = lastDurationRecord;
                 durationTxt.classList.add("text-indigo-500");

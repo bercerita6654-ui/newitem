@@ -50,7 +50,7 @@
             box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
         }
         
-        .loader { border: 3px solid #e2e8f0; border-bottom-color: #6366f1; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
+        .loader { border: 3px solid rgba(255,255,255,0.3); border-bottom-color: #ffffff; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         select { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; }
@@ -62,20 +62,20 @@
         <!-- Header Section -->
         <header class="mb-10 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-semibold mb-4 tracking-wide shadow-sm">
-                    <i class="ph-fill ph-sparkle text-indigo-500"></i> AIO Smart Sync
+                <div id="headerBadge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-100 text-orange-600 text-xs font-semibold mb-4 tracking-wide shadow-sm transition-colors">
+                    <i id="headerBadgeIcon" class="ph-fill ph-sparkle text-orange-500"></i> AIO Smart Sync
                 </div>
                 <h1 class="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight">Komparasi SKU & Stok</h1>
                 <p class="text-slate-500 mt-2 text-sm">Temukan selisih stok, kelola produk terupload, dan cek produk discontinued.</p>
                 
                 <!-- Realtime Clock -->
                 <div class="flex items-center justify-center md:justify-start gap-2 text-xs font-medium text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm w-fit mt-3 mx-auto md:mx-0">
-                    <i class="ph-bold ph-clock text-indigo-500"></i>
+                    <i class="ph-bold ph-clock text-slate-400"></i>
                     <span id="realtimeClock">Memuat waktu...</span>
                 </div>
             </div>
             
-            <button id="processBtn" onclick="mulaiKomparasi()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-indigo-200 transition-all active:scale-95 flex items-center gap-3 shrink-0">
+            <button id="processBtn" onclick="mulaiKomparasi()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-orange-200 transition-all active:scale-95 flex items-center gap-3 shrink-0">
                 <i class="ph-bold ph-magic-wand text-xl"></i>
                 <span id="processText">Mulai Analisis</span>
                 <div id="processLoader" class="loader hidden"></div>
@@ -84,9 +84,9 @@
 
         <!-- Marketplace Switcher -->
         <div class="flex justify-center md:justify-start mb-6">
-            <div class="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-sm">
-                <button onclick="switchMarketplace('shopee')" id="btnShopee" class="px-6 py-2 rounded-lg text-sm font-semibold bg-white text-indigo-600 shadow-sm transition-all">Shopee</button>
-                <button onclick="switchMarketplace('tokopedia')" id="btnTokped" class="px-6 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 transition-all">Tokopedia</button>
+            <div class="inline-flex bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner">
+                <button onclick="switchMarketplace('shopee')" id="btnShopee" class="px-8 py-2.5 rounded-lg text-sm font-bold bg-orange-500 text-white shadow-md transition-all duration-300 transform scale-100">Shopee</button>
+                <button onclick="switchMarketplace('tokopedia')" id="btnTokped" class="px-8 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-200 transition-all duration-300">Tokopedia</button>
             </div>
         </div>
 
@@ -95,7 +95,7 @@
             <!-- Upload Data 1 -->
             <div class="clean-card p-5 relative group">
                 <h3 class="text-sm font-semibold mb-1 flex items-center gap-2 text-slate-800">
-                    <i class="ph-fill ph-database text-slate-400"></i> 
+                    <i class="ph-fill ph-database text-orange-500 transition-colors"></i> 
                     <span id="labelData1">File Data 1 (Shopee)</span>
                 </h3>
                 <p id="descData1" class="text-[11px] text-slate-500 mb-3">Mulai Baris 7 | SKU (Kol 6/5) | Stok (Kol 9)</p>
@@ -859,17 +859,37 @@
             const btnTokped = document.getElementById('btnTokped');
             const labelData1 = document.getElementById('labelData1');
             const descData1 = document.getElementById('descData1');
+            const iconData1 = labelData1.previousElementSibling;
+            
+            const headerBadge = document.getElementById('headerBadge');
+            const headerBadgeIcon = document.getElementById('headerBadgeIcon');
+            const processBtn = document.getElementById('processBtn');
             
             if (mp === 'shopee') {
-                btnShopee.className = "px-6 py-2 rounded-lg text-sm font-semibold bg-white text-indigo-600 shadow-sm transition-all";
-                btnTokped.className = "px-6 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 transition-all";
+                btnShopee.className = "px-8 py-2.5 rounded-lg text-sm font-bold bg-orange-500 text-white shadow-md transition-all duration-300 transform scale-100";
+                btnTokped.className = "px-8 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-200 transition-all duration-300";
+                
                 labelData1.textContent = "File Data 1 (Shopee)";
+                iconData1.className = "ph-fill ph-database text-orange-500 transition-colors";
                 descData1.textContent = "Mulai Baris 7 | SKU (Kol 6/5) | Stok (Kol 9)";
+                
+                // Theme orange
+                headerBadge.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-100 text-orange-600 text-xs font-semibold mb-4 tracking-wide shadow-sm transition-colors";
+                headerBadgeIcon.className = "ph-fill ph-sparkle text-orange-500";
+                processBtn.className = "bg-orange-500 hover:bg-orange-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-orange-200 transition-all active:scale-95 flex items-center gap-3 shrink-0";
+                
             } else {
-                btnTokped.className = "px-6 py-2 rounded-lg text-sm font-semibold bg-white text-emerald-600 shadow-sm transition-all";
-                btnShopee.className = "px-6 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-700 transition-all";
+                btnTokped.className = "px-8 py-2.5 rounded-lg text-sm font-bold bg-emerald-500 text-white shadow-md transition-all duration-300 transform scale-100";
+                btnShopee.className = "px-8 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-200 transition-all duration-300";
+                
                 labelData1.textContent = "File Data 1 (Tokopedia)";
+                iconData1.className = "ph-fill ph-database text-emerald-500 transition-colors";
                 descData1.textContent = "Mulai Baris 4 | SKU (Kol 4) | Stok (Kol 9)";
+                
+                // Theme green
+                headerBadge.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs font-semibold mb-4 tracking-wide shadow-sm transition-colors";
+                headerBadgeIcon.className = "ph-fill ph-sparkle text-emerald-500";
+                processBtn.className = "bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-emerald-200 transition-all active:scale-95 flex items-center gap-3 shrink-0";
             }
             
             // Sembunyikan hasil sebelumnya agar tidak tercampur

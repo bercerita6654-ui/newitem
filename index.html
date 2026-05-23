@@ -416,10 +416,19 @@
 
                 const map1 = new Map();
                 data1.forEach(row => {
-                    let sku = String(row[4] || "").trim() + String(row[5] || "").trim();
+                    // PERBAIKAN: Tidak lagi menggabungkan secara buta. 
+                    // Prioritas mengambil SKU dari Kolom 6 (indeks 5). Jika kosong, ambil dari Kolom 5 (indeks 4).
+                    let sku5 = String(row[4] || "").trim();
+                    let sku6 = String(row[5] || "").trim();
+                    let sku = sku6 !== "" ? sku6 : sku5;
+
                     let stock = parseFloat(row[8]);
                     stock = isNaN(stock) ? 0 : stock;
-                    if(sku) map1.set(sku, { stock: stock });
+                    
+                    // Memastikan SKU benar-benar valid dan mengabaikan baris kosong di Excel
+                    if(sku !== "" && sku !== "undefined" && sku !== "0") { 
+                        map1.set(sku, { stock: stock });
+                    }
                 });
 
                 const mapAio = new Map();
@@ -430,7 +439,11 @@
                     let brand = String(row[6] || "").trim() || "-";
                     let stock = parseFloat(row[12]);
                     stock = isNaN(stock) ? 0 : stock;
-                    if(sku) mapAio.set(sku, { stock, name, category, brand });
+                    
+                    // Memastikan SKU benar-benar valid dan mengabaikan baris kosong di Excel
+                    if(sku !== "" && sku !== "undefined" && sku !== "0") { 
+                        mapAio.set(sku, { stock, name, category, brand });
+                    }
                 });
 
                 comparisonResults = { mismatch: [], match: [], only1: [], only2: [] };

@@ -60,7 +60,7 @@
 <body class="min-h-screen">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
         <!-- Header Section -->
-        <header class="mb-10 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
+        <header class="mb-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
                 <div id="headerBadge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-100 text-orange-600 text-xs font-semibold mb-4 tracking-wide shadow-sm transition-colors">
                     <i id="headerBadgeIcon" class="ph-fill ph-sparkle text-orange-500"></i> AIO Smart Sync
@@ -90,15 +90,14 @@
             </div>
         </div>
 
-        <!-- Upload Section -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
             <!-- Upload Data 1 -->
             <div class="clean-card p-5 relative group">
                 <h3 class="text-sm font-semibold mb-1 flex items-center gap-2 text-slate-800">
-                    <i class="ph-fill ph-database text-orange-500 transition-colors"></i> 
+                    <i id="iconData1" class="ph-fill ph-database text-orange-500 transition-colors"></i> 
                     <span id="labelData1">File Data 1 (Shopee)</span>
                 </h3>
-                <p id="descData1" class="text-[11px] text-slate-500 mb-3">Mulai Baris 7 | SKU (Kol 6/5) | Stok (Kol 9)</p>
+                <p id="descData1" class="text-[11px] text-slate-500 mb-3">Mulai Baris 7 | SKU (Kol 6 atau 5) | Stok (Kol 9)</p>
                 <label for="file1" class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
                     <div class="flex flex-col items-center justify-center pt-4 pb-4" id="uploadState1">
                         <i class="ph-bold ph-upload-simple text-xl text-slate-400 mb-1"></i>
@@ -292,7 +291,7 @@
 
     <script>
         // Global State
-        let currentMarketplace = 'shopee';
+        let currentMarketplace = 'shopee'; // default
         let comparisonResults = { mismatch: [], match: [], only1: [], only2: [], discontinued: [] };
         let currentActiveTab = 'mismatch';
         
@@ -329,7 +328,118 @@
             const storedData = localStorage.getItem('aioUploadDataV2');
             if (storedData) {
                 try {
+                    const parsed = JSON.parse(storedData);
+                    if (parsed.date === today) {
+                        savedUploadData = parsed.uploadedSkus || {};
+                    } else {
+                        savedUploadData = {};
+                        saveToLocal();
+                    }
+                } catch(e) {
+                    savedUploadData = {};
+                }
+            } else {
+                savedUploadData = {};
+            }
+        }
+
+        function saveToLocal() {
+            const today = new Date().toISOString().split('T')[0];
+            localStorage.setItem('aioUploadDataV2', JSON.stringify({
+                date: today,
+                uploadedSkus: savedUploadData
+            }));
+        }
+
+        function getUploadedCount() {
+            return Object.keys(savedUploadData).length;
+        }
+
+        function handleFileUpload(input, type) {
+            const file = input.files[0];
+            if (file) {
+                const uploadState = document.getElementById(type === 1 ? 'uploadState1' : type === 'Aio' ? 'uploadStateAio' : 'uploadState3');
+                const successState = document.getElementById(type === 1 ? 'successState1' : type === 'Aio' ? 'successStateAio' : 'successState3');
+                const filenameText = document.getElementById(type === 1 ? 'filename1' : type === 'Aio' ? 'filenameAio' : 'filename3');
+                
+                filenameText.textContent = file.name;
+                uploadState.classList.add('hidden');
+                successState.classList.remove('hidden');
+                successState.classList.add('flex');
+            }
+        }
+
+        function showNotification(title, text, isWarning = false) {
+            const notif = document.getElementById('notification');
+            document.getElementById('notifTitle').textContent = title;
+            document.getElementById('notifText').textContent = text;
+            
+            const icon = document.getElementById('notifIcon');
+            if(isWarning) {
+                icon.className = 'ph-fill ph-warning-circle text-xl text-rose-500';
+            } else {
+                icon.className = 'ph-fill ph-check-circle text-xl text-emerald-500';
+            }
+
+            notif.classList.remove('translate-x-[200%]', 'opacity-0');
+            setTimeout(() => { notif.classList.add('translate-x-[200%]', 'opacity-0'); }, 3000);
+        }
+
+        function copyToClipboard(text, typeName) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification("Disalin", `${typeName} berhasil disalin.`);
+            }).catch(err => {
+                const el = document.createElement('textarea');
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                showNotification("Disalin", `${typeName} berhasil disalin.`);
+            });
+        }
+
+        function readExcel(file, startRow) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const json = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ""});
+                        resolve(json.slice(startRow - 1));
+                    } catch(err) {
+                        reject(err);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        async function mulaiKomparasi() {
+            const file1 = document.getElementById('file1').files[0];
+            const fileAio = document.getElementById('fileAio').files[0];
+            const file3 = document.getElementById('file3').files[0]; // Optional
+
+            if (!file1 || !fileAio) {
+                showNotification("File Kurang", "Harap unggah Data 1 & DATA AIO.", true);
+                return;
+            }
+
+            const btn = document.getElementById('processBtn');
+            const text = document.getElementById('processText');
+            const loader = document.getElementById('processLoader');
+            btn.classList.add('opacity-80', 'cursor-not-allowed');
+            text.textContent = 'Memproses...';
+            loader.classList.remove('hidden');
+
+            try {
+                // Menyesuaikan Aturan Baris sesuai Marketplace
                 let startRow1 = currentMarketplace === 'tokopedia' ? 4 : 7;
+                
                 const data1 = await readExcel(file1, startRow1);
                 const dataAio = await readExcel(fileAio, 2);
                 let data3 = [];
@@ -338,9 +448,13 @@
                 const map1 = new Map();
                 data1.forEach(row => {
                     let sku = "";
+                    
+                    // Menyesuaikan Aturan SKU berdasar Marketplace
                     if (currentMarketplace === 'tokopedia') {
-                        sku = String(row[3] || "").trim(); // Kolom ke-4 (Index 3)
+                        // SKU di kolom ke-4 (Index 3)
+                        sku = String(row[3] || "").trim();
                     } else {
+                        // Shopee: Prioritas baca Kolom 6 (Index 5). Jika kosong, baca Kolom 5 (Index 4).
                         let sku5 = String(row[4] || "").trim();
                         let sku6 = String(row[5] || "").trim();
                         sku = sku6 !== "" ? sku6 : sku5; 
@@ -859,40 +973,40 @@
             const btnTokped = document.getElementById('btnTokped');
             const labelData1 = document.getElementById('labelData1');
             const descData1 = document.getElementById('descData1');
-            const iconData1 = labelData1.previousElementSibling;
+            const iconData1 = document.getElementById('iconData1');
             
             const headerBadge = document.getElementById('headerBadge');
             const headerBadgeIcon = document.getElementById('headerBadgeIcon');
             const processBtn = document.getElementById('processBtn');
             
             if (mp === 'shopee') {
+                // UI Shopee (Orange)
                 btnShopee.className = "px-8 py-2.5 rounded-lg text-sm font-bold bg-orange-500 text-white shadow-md transition-all duration-300 transform scale-100";
-                btnTokped.className = "px-8 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-200 transition-all duration-300";
+                btnTokped.className = "px-8 py-2.5 rounded-lg text-sm font-medium text-slate-500 bg-white hover:bg-slate-200 transition-all duration-300";
                 
                 labelData1.textContent = "File Data 1 (Shopee)";
                 iconData1.className = "ph-fill ph-database text-orange-500 transition-colors";
-                descData1.textContent = "Mulai Baris 7 | SKU (Kol 6/5) | Stok (Kol 9)";
+                descData1.textContent = "Mulai Baris 7 | SKU (Kol 6 atau 5) | Stok (Kol 9)";
                 
-                // Theme orange
                 headerBadge.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-100 text-orange-600 text-xs font-semibold mb-4 tracking-wide shadow-sm transition-colors";
                 headerBadgeIcon.className = "ph-fill ph-sparkle text-orange-500";
                 processBtn.className = "bg-orange-500 hover:bg-orange-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-orange-200 transition-all active:scale-95 flex items-center gap-3 shrink-0";
                 
             } else {
+                // UI Tokopedia (Emerald Green)
                 btnTokped.className = "px-8 py-2.5 rounded-lg text-sm font-bold bg-emerald-500 text-white shadow-md transition-all duration-300 transform scale-100";
-                btnShopee.className = "px-8 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-200 transition-all duration-300";
+                btnShopee.className = "px-8 py-2.5 rounded-lg text-sm font-medium text-slate-500 bg-white hover:bg-slate-200 transition-all duration-300";
                 
                 labelData1.textContent = "File Data 1 (Tokopedia)";
                 iconData1.className = "ph-fill ph-database text-emerald-500 transition-colors";
                 descData1.textContent = "Mulai Baris 4 | SKU (Kol 4) | Stok (Kol 9)";
                 
-                // Theme green
                 headerBadge.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs font-semibold mb-4 tracking-wide shadow-sm transition-colors";
                 headerBadgeIcon.className = "ph-fill ph-sparkle text-emerald-500";
                 processBtn.className = "bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-emerald-200 transition-all active:scale-95 flex items-center gap-3 shrink-0";
             }
             
-            // Sembunyikan hasil sebelumnya agar tidak tercampur
+            // Sembunyikan hasil sebelumnya agar tidak tercampur saat switch
             document.getElementById('summaryCards').classList.add('hidden');
             document.getElementById('resultsSection').classList.add('hidden');
             comparisonResults = { mismatch: [], match: [], only1: [], only2: [], discontinued: [] };

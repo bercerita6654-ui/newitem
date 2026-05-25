@@ -45,174 +45,170 @@
 
         .mission-slot { transition: all 0.3s ease; }
         .slot-filled { 
-            background-color: #6366f1; 
             transform: scale(1.1); 
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
         
-        .loader { border: 3px solid rgba(255,255,255,0.3); border-bottom-color: #ffffff; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
+        .loader { border: 3px solid #e2e8f0; border-radius: 50%; width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         select { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; }
+
+        /* Switch Toggle Base */
+        .toggle-switch { transition: all 0.3s ease; }
     </style>
 </head>
 
-<body class="min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
-        <!-- Header Section -->
-        <header class="mb-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
+<body class="min-h-screen pb-24">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        
+        <!-- Marketplace Switcher -->
+        <div class="flex justify-center mb-8">
+            <div class="bg-slate-200/70 p-1.5 rounded-full inline-flex items-center gap-1 shadow-inner border border-slate-200">
+                <button onclick="setMarketplace('shopee')" id="btnShopee" class="toggle-switch relative px-6 py-2 rounded-full text-sm font-bold bg-orange-500 text-white shadow-md w-36">
+                    <i class="ph-fill ph-shopping-bag mr-1"></i> Shopee
+                </button>
+                <button onclick="setMarketplace('tokopedia')" id="btnTokopedia" class="toggle-switch relative px-6 py-2 rounded-full text-sm font-bold text-slate-500 hover:text-slate-700 w-36">
+                    <i class="ph-fill ph-storefront mr-1"></i> Tokopedia
+                </button>
+            </div>
+        </div>
+
+        <header class="mb-10 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
-                <div id="headerBadge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-100 text-orange-600 text-xs font-semibold mb-4 tracking-wide shadow-sm transition-colors">
-                    <i id="headerBadgeIcon" class="ph-fill ph-sparkle text-orange-500"></i> AIO Smart Sync
+                <div id="badgeMarketplace" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-xs font-semibold mb-3 tracking-wide shadow-sm transition-colors">
+                    <i class="ph-fill ph-sparkle"></i> Mode Shopee Aktif
                 </div>
                 <h1 class="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight">Komparasi SKU & Stok</h1>
-                <p class="text-slate-500 mt-2 text-sm">Temukan selisih stok, kelola produk terupload, dan cek produk discontinued.</p>
                 
-                <!-- Realtime Clock -->
                 <div class="flex items-center justify-center md:justify-start gap-2 text-xs font-medium text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm w-fit mt-3 mx-auto md:mx-0">
-                    <i class="ph-bold ph-clock text-slate-400"></i>
+                    <i class="ph-bold ph-clock" id="iconClock" style="color: #f97316;"></i>
                     <span id="realtimeClock">Memuat waktu...</span>
                 </div>
             </div>
             
-            <button id="processBtn" onclick="mulaiKomparasi()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-orange-200 transition-all active:scale-95 flex items-center gap-3 shrink-0">
+            <button id="processBtn" onclick="mulaiKomparasi()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3.5 rounded-xl font-bold shadow-md shadow-orange-200 transition-all active:scale-95 flex items-center gap-3">
                 <i class="ph-bold ph-magic-wand text-xl"></i>
                 <span id="processText">Mulai Analisis</span>
-                <div id="processLoader" class="loader hidden"></div>
+                <div id="processLoader" class="loader border-b-white hidden"></div>
             </button>
         </header>
 
-        <!-- Marketplace Switcher -->
-        <div class="flex justify-center md:justify-start mb-6">
-            <div class="inline-flex bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner">
-                <button onclick="switchMarketplace('shopee')" id="btnShopee" class="px-8 py-2.5 rounded-lg text-sm font-bold bg-orange-500 text-white shadow-md transition-all duration-300 transform scale-100">Shopee</button>
-                <button onclick="switchMarketplace('tokopedia')" id="btnTokped" class="px-8 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-200 transition-all duration-300">Tokopedia</button>
-            </div>
-        </div>
-
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
             <!-- Upload Data 1 -->
-            <div class="clean-card p-5 relative group">
-                <h3 class="text-sm font-semibold mb-1 flex items-center gap-2 text-slate-800">
-                    <i id="iconData1" class="ph-fill ph-database text-orange-500 transition-colors"></i> 
-                    <span id="labelData1">File Data 1 (Shopee)</span>
-                </h3>
-                <p id="descData1" class="text-[11px] text-slate-500 mb-3">Mulai Baris 7 | SKU (Kol 6 atau 5) | Stok (Kol 9)</p>
-                <label for="file1" class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <div class="flex flex-col items-center justify-center pt-4 pb-4" id="uploadState1">
-                        <i class="ph-bold ph-upload-simple text-xl text-slate-400 mb-1"></i>
+            <div class="clean-card p-6 relative group">
+                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-database text-slate-400"></i> File Data 1 <span id="labelData1" class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-[10px] ml-1 uppercase">Shopee</span></h3>
+                <p id="descData1" class="text-[11px] text-slate-500 mb-4 leading-relaxed">Mulai baris ke-7 | SKU: Kolom 6 (jika kosong ambil Kolom 5) | Stok: Kolom 9</p>
+                
+                <label for="file1" class="flex flex-col items-center justify-center w-full h-28 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6" id="uploadState1">
+                        <i class="ph-bold ph-upload-simple text-2xl text-slate-400 mb-2"></i>
                         <p class="text-xs font-medium text-slate-600">Pilih Data 1</p>
                     </div>
-                    <div id="successState1" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100 p-2">
-                        <i class="ph-fill ph-check-circle text-xl text-emerald-500 mb-1"></i>
-                        <p id="filename1" class="text-[11px] font-semibold text-emerald-700 text-center truncate w-full"></p>
+                    <div id="successState1" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100">
+                        <i class="ph-fill ph-check-circle text-2xl text-emerald-500 mb-1"></i>
+                        <p id="filename1" class="text-xs font-semibold text-emerald-700 text-center px-4 truncate w-full"></p>
                     </div>
                     <input id="file1" type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(this, 1)" />
                 </label>
             </div>
 
             <!-- Upload DATA AIO -->
-            <div class="clean-card p-5 relative group">
-                <h3 class="text-sm font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-cube text-slate-400"></i> File DATA AIO</h3>
-                <p class="text-[11px] text-slate-500 mb-3">Mulai Baris 2 | SKU (Kol 1) | Stok (Kol 13)</p>
-                <label for="fileAio" class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <div class="flex flex-col items-center justify-center pt-4 pb-4" id="uploadStateAio">
-                        <i class="ph-bold ph-upload-simple text-xl text-slate-400 mb-1"></i>
+            <div class="clean-card p-6 relative group">
+                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-cube text-slate-400"></i> File DATA AIO</h3>
+                <p class="text-[11px] text-slate-500 mb-4 leading-relaxed">Mulai baris ke-2 | SKU: Kol 1 | Stok: Kol 13 | Nama: Kol 3 | Kategori: Kol 5 | Merk: Kol 7</p>
+                
+                <label for="fileAio" class="flex flex-col items-center justify-center w-full h-28 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6" id="uploadStateAio">
+                        <i class="ph-bold ph-upload-simple text-2xl text-slate-400 mb-2"></i>
                         <p class="text-xs font-medium text-slate-600">Pilih DATA AIO</p>
                     </div>
-                    <div id="successStateAio" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100 p-2">
-                        <i class="ph-fill ph-check-circle text-xl text-emerald-500 mb-1"></i>
-                        <p id="filenameAio" class="text-[11px] font-semibold text-emerald-700 text-center truncate w-full"></p>
+                    <div id="successStateAio" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100">
+                        <i class="ph-fill ph-check-circle text-2xl text-emerald-500 mb-1"></i>
+                        <p id="filenameAio" class="text-xs font-semibold text-emerald-700 text-center px-4 truncate w-full"></p>
                     </div>
                     <input id="fileAio" type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(this, 'Aio')" />
                 </label>
             </div>
 
             <!-- Upload DATA 3 -->
-            <div class="clean-card p-5 relative group">
-                <h3 class="text-sm font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-prohibit text-slate-400"></i> File Data 3 (Discontinued)</h3>
-                <p class="text-[11px] text-slate-500 mb-3">Opsional | Mulai Baris 2 | SKU (Kol 1)</p>
-                <label for="file3" class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <div class="flex flex-col items-center justify-center pt-4 pb-4" id="uploadState3">
-                        <i class="ph-bold ph-upload-simple text-xl text-slate-400 mb-1"></i>
+            <div class="clean-card p-6 relative group">
+                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-archive text-slate-400"></i> File Data 3 <span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[10px] ml-1 border border-slate-200">Opsional</span></h3>
+                <p class="text-[11px] text-slate-500 mb-4 leading-relaxed">Untuk cek Discontinued | Mulai baris ke-2 | SKU: Kol 1</p>
+                
+                <label for="file3" class="flex flex-col items-center justify-center w-full h-28 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6" id="uploadState3">
+                        <i class="ph-bold ph-upload-simple text-2xl text-slate-400 mb-2"></i>
                         <p class="text-xs font-medium text-slate-600">Pilih Data 3</p>
                     </div>
-                    <div id="successState3" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100 p-2">
-                        <i class="ph-fill ph-check-circle text-xl text-emerald-500 mb-1"></i>
-                        <p id="filename3" class="text-[11px] font-semibold text-emerald-700 text-center truncate w-full"></p>
+                    <div id="successState3" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100">
+                        <i class="ph-fill ph-check-circle text-2xl text-emerald-500 mb-1"></i>
+                        <p id="filename3" class="text-xs font-semibold text-emerald-700 text-center px-4 truncate w-full"></p>
                     </div>
                     <input id="file3" type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(this, 3)" />
                 </label>
             </div>
         </div>
 
-        <!-- Tab Summary Cards -->
-        <div id="summaryCards" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8 hidden">
-            <!-- Selisih -->
-            <div onclick="switchTab('mismatch')" id="tab-mismatch" class="clean-card clean-card-hover p-4 cursor-pointer flex items-center gap-3 transition-all">
-                <div class="p-2.5 bg-rose-100 rounded-lg text-rose-500"><i class="ph-bold ph-scales text-lg"></i></div>
-                <div>
-                    <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Selisih Stok</p>
+        <div id="summaryCards" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6 hidden">
+            <div onclick="switchTab('mismatch')" id="tab-mismatch" class="clean-card clean-card-hover p-4 cursor-pointer flex flex-col gap-2 transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="p-2 bg-rose-100 rounded text-rose-500"><i class="ph-bold ph-scales text-lg"></i></div>
                     <h4 class="text-xl font-bold text-slate-800" id="countMismatch">0</h4>
                 </div>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Selisih Stok</p>
             </div>
             
-            <!-- Match -->
-            <div onclick="switchTab('match')" id="tab-match" class="clean-card clean-card-hover p-4 cursor-pointer flex items-center gap-3 transition-all">
-                <div class="p-2.5 bg-emerald-100 rounded-lg text-emerald-600"><i class="ph-bold ph-check-square-offset text-lg"></i></div>
-                <div>
-                    <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Stok Sama</p>
+            <div onclick="switchTab('match')" id="tab-match" class="clean-card clean-card-hover p-4 cursor-pointer flex flex-col gap-2 transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="p-2 bg-emerald-100 rounded text-emerald-600"><i class="ph-bold ph-check-square-offset text-lg"></i></div>
                     <h4 class="text-xl font-bold text-slate-800" id="countMatch">0</h4>
                 </div>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Stok Sama</p>
             </div>
 
-            <!-- Only Data 1 -->
-            <div onclick="switchTab('only1')" id="tab-only1" class="clean-card clean-card-hover p-4 cursor-pointer flex items-center gap-3 transition-all">
-                <div class="p-2.5 bg-slate-100 rounded-lg text-slate-500"><i class="ph-bold ph-database text-lg"></i></div>
-                <div>
-                    <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Hanya Data 1</p>
+            <div onclick="switchTab('only1')" id="tab-only1" class="clean-card clean-card-hover p-4 cursor-pointer flex flex-col gap-2 transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="p-2 bg-slate-100 rounded text-slate-500"><i class="ph-bold ph-database text-lg"></i></div>
                     <h4 class="text-xl font-bold text-slate-800" id="countOnly1">0</h4>
                 </div>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Hanya Data 1</p>
             </div>
 
-            <!-- Unuploaded -->
-            <div onclick="switchTab('only2')" id="tab-only2" class="clean-card clean-card-hover p-4 cursor-pointer flex items-center gap-3 transition-all">
-                <div class="p-2.5 bg-indigo-100 rounded-lg text-indigo-500"><i class="ph-bold ph-cloud-arrow-up text-lg"></i></div>
-                <div>
-                    <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Blm Terupload</p>
+            <div onclick="switchTab('only2')" id="tab-only2" class="clean-card clean-card-hover p-4 cursor-pointer flex flex-col gap-2 transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="p-2 bg-indigo-100 rounded text-indigo-500"><i class="ph-bold ph-cloud-arrow-up text-lg"></i></div>
                     <h4 class="text-xl font-bold text-slate-800" id="countOnly2">0</h4>
                 </div>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Belum Upload</p>
             </div>
 
-            <!-- Discontinued -->
-            <div onclick="switchTab('discontinued')" id="tab-discontinued" class="clean-card clean-card-hover p-4 cursor-pointer flex items-center gap-3 transition-all col-span-2 md:col-span-1">
-                <div class="p-2.5 bg-amber-100 rounded-lg text-amber-500"><i class="ph-bold ph-prohibit text-lg"></i></div>
-                <div>
-                    <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">Discontinued</p>
+            <div onclick="switchTab('discontinued')" id="tab-discontinued" class="clean-card clean-card-hover p-4 cursor-pointer flex flex-col gap-2 transition-all">
+                <div class="flex items-center justify-between">
+                    <div class="p-2 bg-amber-100 rounded text-amber-500"><i class="ph-bold ph-archive-box text-lg"></i></div>
                     <h4 class="text-xl font-bold text-slate-800" id="countDiscontinued">0</h4>
                 </div>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Discontinued</p>
             </div>
         </div>
 
         <div id="resultsSection" class="clean-card overflow-hidden hidden opacity-0 translate-y-4 transition-all duration-500 shadow-sm border border-slate-200">
-            <!-- Header Filter Bar -->
+            
+            <!-- Filters and Search -->
             <div class="p-4 border-b border-slate-200 bg-slate-50/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                
-                <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                    <!-- Global Search -->
-                    <div class="relative w-full md:w-80 text-slate-600">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <div class="relative w-full md:w-72 text-slate-600">
                         <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari SKU atau Nama Produk..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 text-sm placeholder-slate-400 transition-colors shadow-sm">
+                        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari SKU atau Nama..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-200 text-sm shadow-sm">
                     </div>
-                    <!-- Export Excel -->
-                    <button onclick="downloadExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 shadow-sm shrink-0">
-                        <i class="ph-bold ph-file-xls text-lg"></i> Download Excel
+                    <!-- Excel Export Button -->
+                    <button onclick="exportToExcel()" class="bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 px-3 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors flex items-center gap-1.5 shrink-0" title="Download Excel Data yang Ditampilkan">
+                        <i class="ph-bold ph-file-xls text-lg"></i> Excel
                     </button>
                 </div>
-
-                <!-- Dynamic Controls based on Tab -->
+                
                 <div id="dynamicControls" class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                    <!-- Placeholder -->
+                    <!-- Filters injected here -->
                 </div>
             </div>
 
@@ -220,251 +216,246 @@
             <div class="overflow-x-auto bg-white">
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-50 text-[11px] uppercase font-bold text-slate-500 tracking-wider border-b border-slate-200">
-                        <tr id="tableHead">
-                            <!-- Headers injected via JS -->
-                        </tr>
+                        <tr id="tableHead"></tr>
                     </thead>
-                    <tbody id="tableBody" class="text-sm divide-y divide-slate-100">
-                        <!-- Rows injected via JS -->
-                    </tbody>
+                    <tbody id="tableBody" class="text-sm divide-y divide-slate-100"></tbody>
                 </table>
             </div>
             
             <!-- Pagination -->
             <div id="paginationBlock" class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between hidden">
-                <p class="text-xs text-slate-500">Menampilkan <span id="pageInfoStart" class="text-slate-800 font-medium">0</span> - <span id="pageInfoEnd" class="text-slate-800 font-medium">0</span> dari <span id="pageInfoTotal" class="text-slate-800 font-medium">0</span></p>
+                <p class="text-xs text-slate-500">Tampil <span id="pageInfoStart" class="font-bold">0</span> - <span id="pageInfoEnd" class="font-bold">0</span> dari <span id="pageInfoTotal" class="font-bold">0</span></p>
                 <div class="flex gap-2">
-                    <button onclick="previousPage()" id="btnPrev" class="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 rounded text-xs font-medium text-slate-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">Sebelumnya</button>
-                    <button onclick="nextPage()" id="btnNext" class="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 rounded text-xs font-medium text-slate-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">Selanjutnya</button>
+                    <button onclick="previousPage()" id="btnPrev" class="px-3 py-1.5 bg-white border border-slate-300 rounded text-xs font-bold transition-colors shadow-sm disabled:opacity-50">Sebelumnya</button>
+                    <button onclick="nextPage()" id="btnNext" class="px-3 py-1.5 bg-white border border-slate-300 rounded text-xs font-bold transition-colors shadow-sm disabled:opacity-50">Selanjutnya</button>
                 </div>
             </div>
 
             <!-- Empty State -->
             <div id="emptyState" class="hidden py-16 text-center bg-white">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 border border-slate-100 mb-4 text-slate-300">
-                    <i class="ph-fill ph-ghost text-3xl"></i>
-                </div>
-                <p class="text-slate-700 font-medium">Tidak ada data yang ditemukan.</p>
-                <p class="text-slate-500 text-xs mt-1">Data kosong atau coba sesuaikan filter pencarian.</p>
+                <i class="ph-fill ph-ghost text-4xl text-slate-300 mb-3"></i>
+                <p class="text-slate-700 font-bold">Tidak ada data ditemukan.</p>
+                <p class="text-slate-500 text-xs mt-1">Coba sesuaikan filter Anda.</p>
             </div>
         </div>
     </div>
 
-    <!-- Notification -->
-    <div id="notification" class="fixed top-6 right-6 bg-white text-slate-800 px-4 py-3 rounded-xl shadow-xl shadow-slate-200/50 border border-slate-200 flex items-center gap-3 transform translate-x-[200%] opacity-0 transition-all duration-300 z-50">
-        <i class="ph-fill ph-check-circle text-xl text-emerald-500" id="notifIcon"></i>
-        <div>
-            <h4 class="text-sm font-semibold text-slate-800" id="notifTitle">Informasi</h4>
-            <p id="notifText" class="text-xs text-slate-500 mt-0.5">Pesan notifikasi</p>
-        </div>
-    </div>
-
-    <!-- HUD Mission Panel -->
-    <div id="missionPanel" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white border border-slate-200 p-3 rounded-2xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1)] z-40 flex items-center gap-4 transition-all duration-300 translate-y-[200%] opacity-0">
+    <div id="missionPanel" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white border border-slate-200 p-3.5 rounded-2xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.15)] z-40 flex items-center gap-4 transition-all duration-300 translate-y-[200%] opacity-0">
         <div class="flex items-center gap-2">
-            <div class="bg-indigo-500 p-2 rounded-lg text-white shadow-sm">
-                <i class="ph-fill ph-target text-lg"></i>
+            <div id="missionIconBg" class="bg-indigo-500 p-2.5 rounded-xl text-white shadow-sm">
+                <i class="ph-fill ph-target text-xl"></i>
             </div>
-            <div class="flex flex-col ml-1 hidden sm:flex">
-                <span class="text-[10px] text-slate-500 uppercase tracking-wide leading-none mb-1">Misi Harian</span>
-                <span class="text-xs font-bold text-slate-700 leading-none">Target Upload</span>
+            <div class="flex flex-col ml-1 hidden sm:flex min-w-[80px]">
+                <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Misi Harian</span>
+                <span id="missionTitle" class="text-xs font-bold text-slate-700 leading-none">Target Upload</span>
             </div>
         </div>
         
-        <div class="h-8 w-px bg-slate-200 mx-1"></div>
+        <div class="h-10 w-px bg-slate-200 mx-1"></div>
         
         <div class="flex items-center gap-3">
             <div class="flex flex-col items-center">
                 <div id="missionSlots" class="flex items-center gap-1.5">
-                    <!-- Slots injected by JS -->
+                    <!-- Slots dynamic -->
                 </div>
-                <!-- Duration tracker -->
-                <div id="uploadDurationTxt" class="text-[10px] text-slate-400 mt-1.5 font-medium tracking-wide">
+                <div id="uploadDurationTxt" class="text-[10px] text-slate-400 mt-2 font-bold tracking-wide bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
                     Belum ada aktivitas
                 </div>
             </div>
-            <div class="ml-1 bg-slate-50 px-3 py-1 rounded-lg border border-slate-200 text-center self-start mt-0.5">
-                <span class="text-lg font-bold text-indigo-600" id="missionCountTxt">0</span><span class="text-slate-400 font-semibold text-xs"> / 5</span>
+            <div class="ml-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-center self-start shadow-inner">
+                <span class="text-xl font-bold text-indigo-600" id="missionCountTxt">0</span><span class="text-slate-400 font-bold text-sm"> / 5</span>
             </div>
         </div>
     </div>
 
+    <div id="notification" class="fixed top-6 right-6 bg-white text-slate-800 px-4 py-3 rounded-xl shadow-xl shadow-slate-200/50 border border-slate-200 flex items-center gap-3 transform translate-x-[200%] opacity-0 transition-all duration-300 z-50">
+        <i class="ph-fill ph-check-circle text-xl text-emerald-500" id="notifIcon"></i>
+        <div>
+            <h4 class="text-sm font-bold text-slate-800" id="notifTitle">Info</h4>
+            <p id="notifText" class="text-xs text-slate-500 mt-0.5 font-medium">Pesan</p>
+        </div>
+    </div>
+
     <script>
-        // Global State
-        let currentMarketplace = 'shopee'; // default
+        // Data States
+        let currentMarketplace = 'shopee';
         let comparisonResults = { mismatch: [], match: [], only1: [], only2: [], discontinued: [] };
         let currentActiveTab = 'mismatch';
         
-        let activeFilters = { min1: null, max1: null, minAio: null, maxAio: null };
         let globalSearchQuery = '';
+        let activeFilters = { min1: null, max1: null, minAio: null, maxAio: null };
         let only2Filters = { category: '', brand: '', sort: '' };
         
         let currentPage = 1;
         const itemsPerPage = 100;
 
-        // App State
+        // Gamification States
         const dailyMissionTarget = 5;
         let selectedForMission = [];
         let savedUploadData = {}; 
         let queueTimestamps = {}; 
         let lastDurationRecord = "-";
 
+        let selectedForMissionDisc = [];
+        let savedDiscData = {};
+        let queueTimestampsDisc = {}; 
+        let lastDurationRecordDisc = "-";
+
         window.onload = function() {
             initLocalStorage();
             startRealtimeClock();
         }
 
+        // Initialize Time
         function startRealtimeClock() {
             const clockEl = document.getElementById('realtimeClock');
             setInterval(() => {
                 const now = new Date();
-                const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-                clockEl.textContent = now.toLocaleDateString('id-ID', options).replace(/\./g, ':');
+                clockEl.textContent = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':');
             }, 1000);
         }
 
-        function initLocalStorage() {
-            const today = new Date().toISOString().split('T')[0]; 
-            const storedData = localStorage.getItem('aioUploadDataV2');
-            if (storedData) {
-                try {
-                    const parsed = JSON.parse(storedData);
-                    if (parsed.date === today) {
-                        savedUploadData = parsed.uploadedSkus || {};
-                    } else {
-                        savedUploadData = {};
-                        saveToLocal();
-                    }
-                } catch(e) {
-                    savedUploadData = {};
-                }
+        // Marketplace Switcher Logic
+        function setMarketplace(type) {
+            currentMarketplace = type;
+            const btnS = document.getElementById('btnShopee');
+            const btnT = document.getElementById('btnTokopedia');
+            const badge = document.getElementById('badgeMarketplace');
+            const procBtn = document.getElementById('processBtn');
+            const clockIcon = document.getElementById('iconClock');
+            
+            const lbl = document.getElementById('labelData1');
+            const desc = document.getElementById('descData1');
+
+            if (type === 'shopee') {
+                btnS.className = "toggle-switch relative px-6 py-2 rounded-full text-sm font-bold bg-orange-500 text-white shadow-md w-36";
+                btnT.className = "toggle-switch relative px-6 py-2 rounded-full text-sm font-bold text-slate-500 hover:text-slate-700 w-36";
+                badge.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-xs font-bold mb-3 tracking-wide shadow-sm";
+                badge.innerHTML = '<i class="ph-fill ph-sparkle"></i> Mode Shopee Aktif';
+                procBtn.className = "bg-orange-500 hover:bg-orange-600 text-white px-6 py-3.5 rounded-xl font-bold shadow-md shadow-orange-200 transition-all active:scale-95 flex items-center gap-3";
+                clockIcon.style.color = "#f97316";
+                
+                lbl.className = "bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-[10px] ml-1 uppercase border border-orange-200";
+                lbl.textContent = "Shopee";
+                desc.textContent = "Mulai baris ke-7 | SKU: Kolom 6 (jika kosong ambil Kol 5) | Stok: Kol 9";
             } else {
-                savedUploadData = {};
+                btnT.className = "toggle-switch relative px-6 py-2 rounded-full text-sm font-bold bg-emerald-500 text-white shadow-md w-36";
+                btnS.className = "toggle-switch relative px-6 py-2 rounded-full text-sm font-bold text-slate-500 hover:text-slate-700 w-36";
+                badge.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs font-bold mb-3 tracking-wide shadow-sm";
+                badge.innerHTML = '<i class="ph-fill ph-sparkle"></i> Mode Tokopedia Aktif';
+                procBtn.className = "bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3.5 rounded-xl font-bold shadow-md shadow-emerald-200 transition-all active:scale-95 flex items-center gap-3";
+                clockIcon.style.color = "#10b981";
+                
+                lbl.className = "bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[10px] ml-1 uppercase border border-emerald-200";
+                lbl.textContent = "Tokopedia";
+                desc.textContent = "Mulai baris ke-4 | SKU: Kolom 4 | Stok: Kol 9";
             }
         }
 
-        function saveToLocal() {
-            const today = new Date().toISOString().split('T')[0];
-            localStorage.setItem('aioUploadDataV2', JSON.stringify({
-                date: today,
-                uploadedSkus: savedUploadData
+        // Local Storage
+        function initLocalStorage() {
+            const today = new Date().toISOString().split('T')[0]; 
+            const stored = localStorage.getItem('aioSyncData');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    if (parsed.date === today) {
+                        savedUploadData = parsed.uploaded || {};
+                        savedDiscData = parsed.disc || {};
+                    } else { saveToLocal(true); }
+                } catch(e) { saveToLocal(true); }
+            } else { saveToLocal(true); }
+        }
+
+        function saveToLocal(reset = false) {
+            if(reset) { savedUploadData = {}; savedDiscData = {}; }
+            localStorage.setItem('aioSyncData', JSON.stringify({
+                date: new Date().toISOString().split('T')[0],
+                uploaded: savedUploadData,
+                disc: savedDiscData
             }));
         }
 
-        function getUploadedCount() {
-            return Object.keys(savedUploadData).length;
-        }
-
-        function handleFileUpload(input, type) {
-            const file = input.files[0];
-            if (file) {
-                const uploadState = document.getElementById(type === 1 ? 'uploadState1' : type === 'Aio' ? 'uploadStateAio' : 'uploadState3');
-                const successState = document.getElementById(type === 1 ? 'successState1' : type === 'Aio' ? 'successStateAio' : 'successState3');
-                const filenameText = document.getElementById(type === 1 ? 'filename1' : type === 'Aio' ? 'filenameAio' : 'filename3');
-                
-                filenameText.textContent = file.name;
-                uploadState.classList.add('hidden');
-                successState.classList.remove('hidden');
-                successState.classList.add('flex');
-            }
-        }
-
+        // Utils
         function showNotification(title, text, isWarning = false) {
             const notif = document.getElementById('notification');
             document.getElementById('notifTitle').textContent = title;
             document.getElementById('notifText').textContent = text;
-            
             const icon = document.getElementById('notifIcon');
-            if(isWarning) {
-                icon.className = 'ph-fill ph-warning-circle text-xl text-rose-500';
-            } else {
-                icon.className = 'ph-fill ph-check-circle text-xl text-emerald-500';
-            }
-
+            icon.className = isWarning ? 'ph-fill ph-warning-circle text-xl text-rose-500' : 'ph-fill ph-check-circle text-xl text-emerald-500';
             notif.classList.remove('translate-x-[200%]', 'opacity-0');
             setTimeout(() => { notif.classList.add('translate-x-[200%]', 'opacity-0'); }, 3000);
         }
 
         function copyToClipboard(text, typeName) {
             navigator.clipboard.writeText(text).then(() => {
-                showNotification("Disalin", `${typeName} berhasil disalin.`);
+                showNotification("Tersalin", `${typeName} disalin.`);
             }).catch(err => {
-                const el = document.createElement('textarea');
-                el.value = text;
-                document.body.appendChild(el);
-                el.select();
-                document.execCommand('copy');
-                document.body.removeChild(el);
-                showNotification("Disalin", `${typeName} berhasil disalin.`);
+                const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+                showNotification("Tersalin", `${typeName} disalin.`);
             });
+        }
+
+        // File Handler
+        function handleFileUpload(input, type) {
+            const file = input.files[0];
+            if (file) {
+                const uState = document.getElementById(`uploadState${type}`);
+                const sState = document.getElementById(`successState${type}`);
+                document.getElementById(`filename${type}`).textContent = file.name;
+                uState.classList.add('hidden'); sState.classList.remove('hidden'); sState.classList.add('flex');
+            }
         }
 
         function readExcel(file, startRow) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = e => {
                     try {
                         const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, {type: 'array'});
-                        const firstSheetName = workbook.SheetNames[0];
-                        const worksheet = workbook.Sheets[firstSheetName];
-                        const json = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ""});
+                        const wb = XLSX.read(data, {type: 'array'});
+                        const ws = wb.Sheets[wb.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(ws, {header: 1, defval: ""});
                         resolve(json.slice(startRow - 1));
-                    } catch(err) {
-                        reject(err);
-                    }
+                    } catch(err) { reject(err); }
                 };
-                reader.onerror = reject;
-                reader.readAsArrayBuffer(file);
+                reader.onerror = reject; reader.readAsArrayBuffer(file);
             });
         }
 
         async function mulaiKomparasi() {
             const file1 = document.getElementById('file1').files[0];
             const fileAio = document.getElementById('fileAio').files[0];
-            const file3 = document.getElementById('file3').files[0]; // Optional
+            const file3 = document.getElementById('file3').files[0];
 
             if (!file1 || !fileAio) {
-                showNotification("File Kurang", "Harap unggah Data 1 & DATA AIO.", true);
+                showNotification("File Kurang", "Harap unggah minimal Data 1 & DATA AIO.", true);
                 return;
             }
 
             const btn = document.getElementById('processBtn');
             const text = document.getElementById('processText');
             const loader = document.getElementById('processLoader');
-            btn.classList.add('opacity-80', 'cursor-not-allowed');
-            text.textContent = 'Memproses...';
-            loader.classList.remove('hidden');
+            btn.classList.add('opacity-80', 'cursor-not-allowed'); text.textContent = 'Memproses...'; loader.classList.remove('hidden');
 
             try {
-                // Menyesuaikan Aturan Baris sesuai Marketplace
-                let startRow1 = currentMarketplace === 'tokopedia' ? 4 : 7;
-                
-                const data1 = await readExcel(file1, startRow1);
+                let startRowD1 = currentMarketplace === 'shopee' ? 7 : 4;
+                const data1 = await readExcel(file1, startRowD1);
                 const dataAio = await readExcel(fileAio, 2);
-                let data3 = [];
-                if (file3) data3 = await readExcel(file3, 2);
+                const data3 = file3 ? await readExcel(file3, 2) : [];
 
                 const map1 = new Map();
                 data1.forEach(row => {
                     let sku = "";
-                    
-                    // Menyesuaikan Aturan SKU berdasar Marketplace
-                    if (currentMarketplace === 'tokopedia') {
-                        // SKU di kolom ke-4 (Index 3)
-                        sku = String(row[3] || "").trim();
+                    if (currentMarketplace === 'shopee') {
+                        // Priority Col 6 (idx 5), fallback Col 5 (idx 4)
+                        sku = String(row[5] || "").trim() || String(row[4] || "").trim();
                     } else {
-                        // Shopee: Prioritas baca Kolom 6 (Index 5). Jika kosong, baca Kolom 5 (Index 4).
-                        let sku5 = String(row[4] || "").trim();
-                        let sku6 = String(row[5] || "").trim();
-                        sku = sku6 !== "" ? sku6 : sku5; 
+                        // Col 4 (idx 3)
+                        sku = String(row[3] || "").trim();
                     }
-                    
-                    let stock = parseFloat(row[8]); // Asumsi kolom stok tetap di Kolom 9 (Index 8)
-                    stock = isNaN(stock) ? 0 : stock;
-                    if(sku !== "" && sku !== "undefined" && sku !== "0") { 
-                        map1.set(sku, { stock: stock });
-                    }
+                    let stock = parseFloat(row[8]); stock = isNaN(stock) ? 0 : stock;
+                    if(sku) map1.set(sku, { stock });
                 });
 
                 const mapAio = new Map();
@@ -473,543 +464,318 @@
                     let name = String(row[2] || "").trim() || "-";
                     let category = String(row[4] || "").trim() || "-";
                     let brand = String(row[6] || "").trim() || "-";
-                    let stock = parseFloat(row[12]);
-                    stock = isNaN(stock) ? 0 : stock;
-                    if(sku !== "" && sku !== "undefined" && sku !== "0") { 
-                        mapAio.set(sku, { stock, name, category, brand });
-                    }
+                    let stock = parseFloat(row[12]); stock = isNaN(stock) ? 0 : stock;
+                    if(sku) mapAio.set(sku, { stock, name, category, brand });
                 });
 
                 const map3 = new Map();
                 data3.forEach(row => {
                     let sku = String(row[0] || "").trim();
                     let name = String(row[2] || "").trim() || "-";
-                    let stock = parseFloat(row[12]);
-                    stock = isNaN(stock) ? 0 : stock;
-                    if(sku !== "" && sku !== "undefined" && sku !== "0") { 
-                        map3.set(sku, { stock, name });
-                    }
+                    let stock = parseFloat(row[12]); stock = isNaN(stock) ? 0 : stock;
+                    if(sku) map3.set(sku, { stock, name });
                 });
 
                 comparisonResults = { mismatch: [], match: [], only1: [], only2: [], discontinued: [] };
 
+                // Processing Maps
                 map1.forEach((val1, sku) => {
-                    // Check Match / Mismatch
+                    // Cek Discontinued
+                    if (map3.has(sku)) {
+                        comparisonResults.discontinued.push({ sku, name: map3.get(sku).name, stock1: val1.stock, stock3: map3.get(sku).stock });
+                    }
+                    // Cek Komparasi Normal
                     if(mapAio.has(sku)) {
                         let valAio = mapAio.get(sku);
-                        if(val1.stock === valAio.stock) {
-                            comparisonResults.match.push({sku, name: valAio.name, stock1: val1.stock, stockAio: valAio.stock});
-                        } else {
-                            comparisonResults.mismatch.push({sku, name: valAio.name, stock1: val1.stock, stockAio: valAio.stock});
-                        }
+                        if(val1.stock === valAio.stock) comparisonResults.match.push({sku, name: valAio.name, stock1: val1.stock, stockAio: valAio.stock});
+                        else comparisonResults.mismatch.push({sku, name: valAio.name, stock1: val1.stock, stockAio: valAio.stock});
                     } else {
                         comparisonResults.only1.push({sku, stock1: val1.stock});
-                    }
-
-                    // Check Discontinued
-                    if (map3.has(sku)) {
-                        let val3 = map3.get(sku);
-                        comparisonResults.discontinued.push({
-                            sku, name: val3.name, stock1: val1.stock, stock3: val3.stock
-                        });
                     }
                 });
 
                 mapAio.forEach((valAio, sku) => {
-                    if(!map1.has(sku)) {
-                        comparisonResults.only2.push({
-                            sku, name: valAio.name, stockAio: valAio.stock, category: valAio.category, brand: valAio.brand
-                        });
-                    }
+                    if(!map1.has(sku)) comparisonResults.only2.push({ sku, name: valAio.name, stockAio: valAio.stock, category: valAio.category, brand: valAio.brand });
                 });
 
-                document.getElementById('countMismatch').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.mismatch.length);
-                document.getElementById('countMatch').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.match.length);
-                document.getElementById('countOnly1').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.only1.length);
-                document.getElementById('countOnly2').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.only2.length);
-                document.getElementById('countDiscontinued').textContent = new Intl.NumberFormat('id-ID').format(comparisonResults.discontinued.length);
+                // Update UI Counters
+                document.getElementById('countMismatch').textContent = comparisonResults.mismatch.length;
+                document.getElementById('countMatch').textContent = comparisonResults.match.length;
+                document.getElementById('countOnly1').textContent = comparisonResults.only1.length;
+                document.getElementById('countOnly2').textContent = comparisonResults.only2.length;
+                document.getElementById('countDiscontinued').textContent = comparisonResults.discontinued.length;
 
-                updateMissionPanel();
                 document.getElementById('summaryCards').classList.remove('hidden');
-                
-                const resultsSection = document.getElementById('resultsSection');
-                resultsSection.classList.remove('hidden');
-                void resultsSection.offsetWidth; 
-                resultsSection.classList.remove('opacity-0', 'translate-y-4');
+                const rs = document.getElementById('resultsSection');
+                rs.classList.remove('hidden'); void rs.offsetWidth; rs.classList.remove('opacity-0', 'translate-y-4');
                 
                 switchTab('mismatch');
-                showNotification("Selesai", "Data berhasil diproses.");
+                showNotification("Sukses", "Data berhasil dianalisis!");
 
             } catch (error) {
-                console.error(error);
-                showNotification("Error", "Gagal memproses data. Pastikan format Excel sesuai.", true);
+                console.error(error); showNotification("Error", "Gagal memproses data.", true);
             } finally {
-                btn.classList.remove('opacity-80', 'cursor-not-allowed');
-                text.textContent = 'Mulai Analisis';
-                loader.classList.add('hidden');
+                btn.classList.remove('opacity-80', 'cursor-not-allowed'); text.textContent = 'Mulai Analisis'; loader.classList.add('hidden');
             }
         }
 
         function switchTab(tabName) {
-            try {
-                currentActiveTab = tabName;
-                currentPage = 1;
-                document.getElementById('searchInput').value = '';
-                globalSearchQuery = '';
+            currentActiveTab = tabName;
+            currentPage = 1;
+            document.getElementById('searchInput').value = ''; globalSearchQuery = '';
 
-                ['mismatch', 'match', 'only1', 'only2', 'discontinued'].forEach(t => {
-                    const el = document.getElementById(`tab-${t}`);
-                    if(el) {
-                        el.classList.remove('bg-rose-50', 'border-rose-300', 'shadow-sm', 'bg-emerald-50', 'border-emerald-300', 'bg-slate-50', 'border-slate-300', 'bg-indigo-50', 'border-indigo-300', 'bg-amber-50', 'border-amber-300');
-                        el.classList.add('bg-white', 'border-slate-200');
-                    }
-                });
+            ['mismatch', 'match', 'only1', 'only2', 'discontinued'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if(el) el.classList.remove('bg-rose-50', 'bg-emerald-50', 'bg-slate-50', 'bg-indigo-50', 'bg-amber-50', 'border-rose-300', 'border-emerald-300', 'border-slate-300', 'border-indigo-300', 'border-amber-300', 'shadow-sm');
+            });
 
-                const activeEl = document.getElementById(`tab-${tabName}`);
-                if(activeEl) {
-                    activeEl.classList.remove('bg-white', 'border-slate-200');
-                    if(tabName === 'mismatch') activeEl.classList.add('bg-rose-50', 'border-rose-300', 'shadow-sm');
-                    else if(tabName === 'match') activeEl.classList.add('bg-emerald-50', 'border-emerald-300', 'shadow-sm');
-                    else if(tabName === 'only1') activeEl.classList.add('bg-slate-50', 'border-slate-300', 'shadow-sm');
-                    else if(tabName === 'only2') activeEl.classList.add('bg-indigo-50', 'border-indigo-300', 'shadow-sm');
-                    else if(tabName === 'discontinued') activeEl.classList.add('bg-amber-50', 'border-amber-300', 'shadow-sm');
-                }
+            const activeEl = document.getElementById(`tab-${tabName}`);
+            if(activeEl) {
+                if(tabName === 'mismatch') activeEl.classList.add('bg-rose-50', 'border-rose-300', 'shadow-sm');
+                else if(tabName === 'match') activeEl.classList.add('bg-emerald-50', 'border-emerald-300', 'shadow-sm');
+                else if(tabName === 'only1') activeEl.classList.add('bg-slate-50', 'border-slate-300', 'shadow-sm');
+                else if(tabName === 'only2') activeEl.classList.add('bg-indigo-50', 'border-indigo-300', 'shadow-sm');
+                else if(tabName === 'discontinued') activeEl.classList.add('bg-amber-50', 'border-amber-300', 'shadow-sm');
+            }
 
-                const missionPanel = document.getElementById('missionPanel');
-                if(tabName === 'only2') {
-                    missionPanel.classList.remove('translate-y-[200%]', 'opacity-0');
-                    updateMissionPanel();
-                } else {
-                    missionPanel.classList.add('translate-y-[200%]', 'opacity-0');
-                }
+            const missionPanel = document.getElementById('missionPanel');
+            if(tabName === 'only2' || tabName === 'discontinued') {
+                missionPanel.classList.remove('translate-y-[200%]', 'opacity-0');
+            } else {
+                missionPanel.classList.add('translate-y-[200%]', 'opacity-0');
+            }
 
-                renderDynamicControls();
-                renderTable();
-            } catch (e) { console.error("Tab switch error", e); }
+            updateMissionPanel();
+            renderDynamicControls();
+            renderTable();
         }
 
+        // Filters UI
         function renderDynamicControls() {
             const container = document.getElementById('dynamicControls');
             let html = '';
-            const inputClass = "w-24 px-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-700 shadow-sm focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 outline-none";
-            const selectClass = "w-40 px-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-700 cursor-pointer shadow-sm hover:bg-slate-50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 outline-none pr-8";
+            const inClass = "w-24 px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold focus:border-indigo-400 outline-none";
+            const selClass = "w-40 px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold cursor-pointer outline-none pr-8";
 
             if (currentActiveTab === 'mismatch') {
-                html = `
-                    <div class="flex gap-2">
-                        <input type="number" id="min1" placeholder="Min D1" class="${inputClass}" oninput="updateMismatchFilter()">
-                        <input type="number" id="max1" placeholder="Max D1" class="${inputClass}" oninput="updateMismatchFilter()">
-                    </div>
-                    <div class="flex gap-2">
-                        <input type="number" id="minAio" placeholder="Min AIO" class="${inputClass}" oninput="updateMismatchFilter()">
-                        <input type="number" id="maxAio" placeholder="Max AIO" class="${inputClass}" oninput="updateMismatchFilter()">
-                    </div>
-                `;
+                html = `<div class="flex gap-2"><input type="number" id="min1" placeholder="Min D1" class="${inClass}" oninput="activeFilters.min1=parseFloat(this.value); currentPage=1; renderTable();"><input type="number" id="max1" placeholder="Max D1" class="${inClass}" oninput="activeFilters.max1=parseFloat(this.value); currentPage=1; renderTable();"></div><div class="flex gap-2"><input type="number" id="minAio" placeholder="Min AIO" class="${inClass}" oninput="activeFilters.minAio=parseFloat(this.value); currentPage=1; renderTable();"><input type="number" id="maxAio" placeholder="Max AIO" class="${inClass}" oninput="activeFilters.maxAio=parseFloat(this.value); currentPage=1; renderTable();"></div>`;
             } else if (currentActiveTab === 'only2') {
+                let catOpts = generateOptions('category'); let brOpts = generateOptions('brand');
                 html = `
-                    <select id="filterCategory" onchange="handleOnly2Filters()" class="${selectClass}">
-                        <option value="">Semua Kategori</option>
-                        ${generateOptions('category')}
-                    </select>
-                    <select id="filterBrand" onchange="handleOnly2Filters()" class="${selectClass}">
-                        <option value="">Semua Merk</option>
-                        ${generateOptions('brand')}
-                    </select>
-                    <select id="sortOnly2" onchange="handleOnly2Filters()" class="w-36 px-3 py-1.5 bg-white border border-slate-300 rounded-md text-xs text-slate-700 cursor-pointer shadow-sm hover:bg-slate-50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 outline-none pr-8">
-                        <option value="">Urutkan Stok</option>
-                        <option value="desc">Tinggi ke Rendah</option>
-                        <option value="asc">Rendah ke Tinggi</option>
-                    </select>
-                    <div class="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-md border border-indigo-200 text-xs font-semibold shadow-sm" id="badgeOnly2Count">0 Ditampilkan</div>
-                `;
+                    <select id="filterCategory" onchange="only2Filters.category=this.value; currentPage=1; renderTable()" class="${selClass}"><option value="">Semua Kategori</option>${catOpts}</select>
+                    <select id="filterBrand" onchange="only2Filters.brand=this.value; currentPage=1; renderTable()" class="${selClass}"><option value="">Semua Merk</option>${brOpts}</select>
+                    <select id="sortOnly2" onchange="only2Filters.sort=this.value; currentPage=1; renderTable()" class="w-36 px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold cursor-pointer outline-none"><option value="">Urutkan Stok</option><option value="desc">Tinggi - Rendah</option><option value="asc">Rendah - Tinggi</option></select>
+                    <div class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg border border-indigo-200 text-xs font-bold" id="badgeOnly2Count">0 Tampil</div>`;
             }
             container.innerHTML = html;
         }
 
         function generateOptions(key) {
             let counts = {};
-            comparisonResults.only2.forEach(item => {
-                let val = String(item[key] || "").trim();
-                if(val === "") val = "-";
-                counts[val] = (counts[val] || 0) + 1;
-            });
-            return Object.keys(counts).sort().map(val => `<option value="${val}">${val} (${counts[val]})</option>`).join('');
+            comparisonResults.only2.forEach(item => { let v = String(item[key]||"").trim()||"-"; counts[v] = (counts[v]||0)+1; });
+            return Object.keys(counts).sort().map(v => `<option value="${v}">${v} (${counts[v]})</option>`).join('');
         }
 
-        function handleSearch() { globalSearchQuery = document.getElementById('searchInput').value.toLowerCase(); currentPage = 1; renderTable(); }
-        function updateMismatchFilter() {
-            activeFilters = {
-                min1: parseFloat(document.getElementById('min1').value), max1: parseFloat(document.getElementById('max1').value),
-                minAio: parseFloat(document.getElementById('minAio').value), maxAio: parseFloat(document.getElementById('maxAio').value)
-            };
-            currentPage = 1; renderTable();
-        }
-        function handleOnly2Filters() {
-            only2Filters = {
-                category: document.getElementById('filterCategory').value,
-                brand: document.getElementById('filterBrand').value,
-                sort: document.getElementById('sortOnly2').value
-            };
-            currentPage = 1; renderTable();
-        }
-
-        function previousPage() { if(currentPage > 1) { currentPage--; renderTable(); scrollToTable(); } }
-        function nextPage() { currentPage++; renderTable(); scrollToTable(); }
-        function scrollToTable() { document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-
+        // Filtering logic for both Render and Excel
         function getFilteredData() {
             let data = comparisonResults[currentActiveTab] || [];
             if (globalSearchQuery) {
-                data = data.filter(item => {
-                    return String(item.sku || "").toLowerCase().includes(globalSearchQuery) || String(item.name || "").toLowerCase().includes(globalSearchQuery);
-                });
+                data = data.filter(item => String(item.sku||"").toLowerCase().includes(globalSearchQuery) || String(item.name||"").toLowerCase().includes(globalSearchQuery));
             }
             if (currentActiveTab === 'mismatch') {
                 data = data.filter(item => {
-                    let pass = true;
-                    if(!isNaN(activeFilters.min1)) pass = pass && item.stock1 >= activeFilters.min1;
-                    if(!isNaN(activeFilters.max1)) pass = pass && item.stock1 <= activeFilters.max1;
-                    if(!isNaN(activeFilters.minAio)) pass = pass && item.stockAio >= activeFilters.minAio;
-                    if(!isNaN(activeFilters.maxAio)) pass = pass && item.stockAio <= activeFilters.maxAio;
-                    return pass;
+                    let p=true;
+                    if(!isNaN(activeFilters.min1)) p = p && item.stock1 >= activeFilters.min1;
+                    if(!isNaN(activeFilters.max1)) p = p && item.stock1 <= activeFilters.max1;
+                    if(!isNaN(activeFilters.minAio)) p = p && item.stockAio >= activeFilters.minAio;
+                    if(!isNaN(activeFilters.maxAio)) p = p && item.stockAio <= activeFilters.maxAio;
+                    return p;
                 });
             }
             if (currentActiveTab === 'only2') {
-                if (only2Filters.category) data = data.filter(item => String(item.category || "").trim() === only2Filters.category || (String(item.category || "").trim() === "" && only2Filters.category === "-"));
-                if (only2Filters.brand) data = data.filter(item => String(item.brand || "").trim() === only2Filters.brand || (String(item.brand || "").trim() === "" && only2Filters.brand === "-"));
+                if (only2Filters.category) data = data.filter(item => (String(item.category||"").trim()||"-") === only2Filters.category);
+                if (only2Filters.brand) data = data.filter(item => (String(item.brand||"").trim()||"-") === only2Filters.brand);
                 if (only2Filters.sort === 'desc') data.sort((a,b) => b.stockAio - a.stockAio);
                 if (only2Filters.sort === 'asc') data.sort((a,b) => a.stockAio - b.stockAio);
             }
             return data;
         }
 
-        function renderTable() {
-            const thead = document.getElementById('tableHead');
-            const tbody = document.getElementById('tableBody');
-            let data = getFilteredData();
+        function handleSearch() { globalSearchQuery = document.getElementById('searchInput').value.toLowerCase(); currentPage = 1; renderTable(); }
+        function previousPage() { if(currentPage > 1) { currentPage--; renderTable(); document.getElementById('resultsSection').scrollIntoView(); } }
+        function nextPage() { currentPage++; renderTable(); document.getElementById('resultsSection').scrollIntoView(); }
 
+        function renderTable() {
+            const data = getFilteredData();
+            
             if (currentActiveTab === 'only2') {
-                const badge = document.getElementById('badgeOnly2Count');
-                if(badge) badge.textContent = `${data.length} Ditampilkan`;
+                const b = document.getElementById('badgeOnly2Count');
+                if(b) b.textContent = `${data.length} Tampil`;
             }
 
             if (data.length === 0) {
-                document.getElementById('emptyState').classList.remove('hidden');
-                document.getElementById('paginationBlock').classList.add('hidden');
-                thead.innerHTML = ''; tbody.innerHTML = ''; return;
-            } else {
-                document.getElementById('emptyState').classList.add('hidden');
-            }
+                document.getElementById('emptyState').classList.remove('hidden'); document.getElementById('paginationBlock').classList.add('hidden');
+                document.getElementById('tableHead').innerHTML=''; document.getElementById('tableBody').innerHTML=''; return;
+            } else document.getElementById('emptyState').classList.add('hidden');
 
             // Headers
-            let headersHtml = `<th class="px-5 py-3 font-semibold">Kode SKU</th>`;
-            if (currentActiveTab !== 'only1') headersHtml += `<th class="px-5 py-3 font-semibold">Nama Produk</th>`;
+            let hHtml = `<th class="px-5 py-3 font-bold text-slate-600">Kode SKU</th>`;
+            if (currentActiveTab !== 'only1') hHtml += `<th class="px-5 py-3 font-bold text-slate-600">Nama Produk</th>`;
             
-            if (currentActiveTab === 'mismatch' || currentActiveTab === 'match') {
-                headersHtml += `<th class="px-5 py-3 font-semibold text-center w-24">Data 1</th><th class="px-5 py-3 font-semibold text-center w-24">AIO</th>`;
-            } else if (currentActiveTab === 'only1') {
-                headersHtml += `<th class="px-5 py-3 font-semibold text-center w-24">Stok D1</th>`;
-            } else if (currentActiveTab === 'only2') {
-                headersHtml += `<th class="px-5 py-3 font-semibold text-center w-24">Stok AIO</th>`;
-            } else if (currentActiveTab === 'discontinued') {
-                headersHtml += `<th class="px-5 py-3 font-semibold text-center w-24">Stok D1</th><th class="px-5 py-3 font-semibold text-center w-24">Stok D3</th>`;
-            }
-            headersHtml += `<th class="px-5 py-3 font-semibold text-right">Status</th>`;
-            thead.innerHTML = headersHtml;
+            if (currentActiveTab === 'mismatch' || currentActiveTab === 'match') hHtml += `<th class="px-5 py-3 font-bold text-center">Data 1</th><th class="px-5 py-3 font-bold text-center">AIO</th>`;
+            else if (currentActiveTab === 'only1') hHtml += `<th class="px-5 py-3 font-bold text-center">Stok D1</th>`;
+            else if (currentActiveTab === 'only2') hHtml += `<th class="px-5 py-3 font-bold text-center">Stok AIO</th>`;
+            else if (currentActiveTab === 'discontinued') hHtml += `<th class="px-5 py-3 font-bold text-center">Stok D1</th><th class="px-5 py-3 font-bold text-center">Stok D3</th>`;
+            
+            hHtml += `<th class="px-5 py-3 font-bold text-right">Status / Aksi</th>`;
+            document.getElementById('tableHead').innerHTML = hHtml;
 
-            // Pagination Calculations
-            const totalItems = data.length;
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
-            if(currentPage > totalPages) currentPage = totalPages || 1;
-            const startIdx = (currentPage - 1) * itemsPerPage;
-            const endIdx = startIdx + itemsPerPage;
-            const paginatedData = data.slice(startIdx, endIdx);
+            // Pagination
+            const total = data.length; const pages = Math.ceil(total/itemsPerPage);
+            if(currentPage > pages) currentPage = pages || 1;
+            const start = (currentPage-1)*itemsPerPage; const end = start + itemsPerPage;
+            const pData = data.slice(start, end);
 
             document.getElementById('paginationBlock').classList.remove('hidden');
-            document.getElementById('pageInfoStart').textContent = startIdx + 1;
-            document.getElementById('pageInfoEnd').textContent = Math.min(endIdx, totalItems);
-            document.getElementById('pageInfoTotal').textContent = totalItems;
+            document.getElementById('pageInfoStart').textContent = start + 1;
+            document.getElementById('pageInfoEnd').textContent = Math.min(end, total);
+            document.getElementById('pageInfoTotal').textContent = total;
             document.getElementById('btnPrev').disabled = currentPage <= 1;
-            document.getElementById('btnNext').disabled = currentPage >= totalPages;
+            document.getElementById('btnNext').disabled = currentPage >= pages;
 
-            // Render Rows
-            tbody.innerHTML = '';
-            paginatedData.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = 'table-row';
+            // Body
+            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
+            pData.forEach(item => {
+                const tr = document.createElement('tr'); tr.className = 'table-row';
+                const sSku = String(item.sku||"").replace(/'/g, "\\'"); const sName = String(item.name||"").replace(/'/g, "\\'");
                 
-                const safeSku = String(item.sku || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                const safeName = String(item.name || "").replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                
-                let html = `
-                    <td class="px-5 py-4 align-top">
-                        <div class="flex items-center gap-2 font-semibold text-slate-700">
-                            ${item.sku}
-                            <button onclick="copyToClipboard('${safeSku}', 'SKU')" class="text-slate-400 hover:text-indigo-500 transition-all" title="Salin SKU">
-                                <i class="ph-bold ph-copy text-base"></i>
-                            </button>
-                        </div>
-                    </td>`;
+                let rHtml = `<td class="px-5 py-4 align-top"><div class="flex items-center gap-2 font-bold text-slate-700">${item.sku} <button onclick="copyToClipboard('${sSku}', 'SKU')" class="text-slate-400 hover:text-indigo-500 hover:scale-110 transition"><i class="ph-bold ph-copy"></i></button></div></td>`;
                 
                 if (currentActiveTab !== 'only1') {
-                    let meta = '';
-                    if(currentActiveTab === 'only2') {
-                        meta = `<div class="text-[10px] text-slate-500 mt-1.5 flex items-center gap-2"><span class="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">${item.brand || '-'}</span> <span class="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">${item.category || '-'}</span></div>`;
-                    }
-                    html += `<td class="px-5 py-4 min-w-[300px] align-top">
-                        <div class="flex items-start gap-2 group">
-                            <div class="text-slate-700 break-words leading-relaxed text-sm font-medium" title="${item.name}">${item.name}</div>
-                            <button onclick="copyToClipboard('${safeName}', 'Nama Produk')" class="text-slate-300 opacity-0 group-hover:opacity-100 hover:text-indigo-500 transition-all mt-0.5 shrink-0" title="Salin Nama Produk">
-                                <i class="ph-bold ph-copy text-base"></i>
-                            </button>
-                        </div>
-                        ${meta}
-                    </td>`;
+                    let meta = currentActiveTab === 'only2' ? `<div class="text-[10px] text-slate-500 mt-1 flex gap-2"><span class="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">${item.brand||'-'}</span><span class="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">${item.category||'-'}</span></div>` : '';
+                    rHtml += `<td class="px-5 py-4 min-w-[250px] align-top"><div class="flex items-start gap-2 group"><div class="text-slate-700 font-bold text-sm break-words">${item.name}</div><button onclick="copyToClipboard('${sName}', 'Nama')" class="text-slate-300 opacity-0 group-hover:opacity-100 hover:text-indigo-500 transition"><i class="ph-bold ph-copy"></i></button></div>${meta}</td>`;
                 }
 
-                if (currentActiveTab === 'mismatch' || currentActiveTab === 'match') {
-                    html += `<td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stock1}</span></td>
-                             <td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stockAio}</span></td>`;
-                } else if (currentActiveTab === 'only1') {
-                    html += `<td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stock1}</span></td>`;
-                } else if (currentActiveTab === 'only2') {
-                    html += `<td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stockAio}</span></td>`;
-                } else if (currentActiveTab === 'discontinued') {
-                    html += `<td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${item.stock1}</span></td>
-                             <td class="px-5 py-4 text-center align-top"><span class="text-slate-700 font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded">${item.stock3}</span></td>`;
-                }
+                if (currentActiveTab === 'mismatch' || currentActiveTab === 'match') rHtml += `<td class="px-5 py-4 text-center align-top"><span class="font-bold bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">${item.stock1}</span></td><td class="px-5 py-4 text-center align-top"><span class="font-bold bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">${item.stockAio}</span></td>`;
+                else if (currentActiveTab === 'only1') rHtml += `<td class="px-5 py-4 text-center align-top"><span class="font-bold bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">${item.stock1}</span></td>`;
+                else if (currentActiveTab === 'only2') rHtml += `<td class="px-5 py-4 text-center align-top"><span class="font-bold bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">${item.stockAio}</span></td>`;
+                else if (currentActiveTab === 'discontinued') rHtml += `<td class="px-5 py-4 text-center align-top"><span class="font-bold bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">${item.stock1}</span></td><td class="px-5 py-4 text-center align-top"><span class="font-bold bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">${item.stock3}</span></td>`;
 
-                // Status Buttons
-                let statusHtml = '';
-                if (currentActiveTab === 'mismatch') {
-                    statusHtml = `<span class="inline-flex items-center px-2.5 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded text-xs font-semibold">Selisih</span>`;
-                } else if (currentActiveTab === 'match') {
-                    statusHtml = `<span class="inline-flex items-center px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded text-xs font-semibold">Sama</span>`;
-                } else if (currentActiveTab === 'only1') {
-                    statusHtml = `<span class="inline-flex items-center px-2.5 py-1 bg-slate-100 text-slate-600 border border-slate-200 rounded text-xs font-semibold">Data 1</span>`;
-                } else if (currentActiveTab === 'discontinued') {
-                    statusHtml = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded text-xs font-semibold"><i class="ph-bold ph-prohibit"></i> Discontinued</span>`;
-                } else if (currentActiveTab === 'only2') {
+                // Status
+                let sHtml = '';
+                if (currentActiveTab === 'mismatch') sHtml = `<span class="inline-flex items-center px-2.5 py-1 bg-rose-100 text-rose-600 rounded text-xs font-bold border border-rose-200">Selisih</span>`;
+                else if (currentActiveTab === 'match') sHtml = `<span class="inline-flex items-center px-2.5 py-1 bg-emerald-100 text-emerald-600 rounded text-xs font-bold border border-emerald-200">Sama</span>`;
+                else if (currentActiveTab === 'only1') sHtml = `<span class="inline-flex items-center px-2.5 py-1 bg-slate-100 text-slate-600 rounded text-xs font-bold border border-slate-200">Data 1 Saja</span>`;
+                else if (currentActiveTab === 'only2') {
                     if (savedUploadData[item.sku]) {
-                        statusHtml = `<button onclick="toggleUploadStatus('${safeSku}')" class="inline-flex items-center justify-center gap-1.5 bg-emerald-50 hover:bg-rose-50 text-emerald-600 hover:text-rose-600 border border-emerald-200 hover:border-rose-200 px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm group w-36">
-                            <span class="inline-flex items-center gap-1 group-hover:hidden"><i class="ph-bold ph-check"></i> Sudah Terupload</span>
-                            <span class="hidden group-hover:inline-flex items-center gap-1"><i class="ph-bold ph-x"></i> Batal</span>
-                        </button>`;
+                        sHtml = `<button onclick="toggleAct('${sSku}', 'up')" class="group flex items-center justify-center gap-1 bg-emerald-100 hover:bg-rose-100 text-emerald-700 hover:text-rose-600 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all w-36 ml-auto"><span class="group-hover:hidden"><i class="ph-bold ph-check"></i> Sudah Terupload</span><span class="hidden group-hover:inline"><i class="ph-bold ph-x"></i> Batal</span></button>`;
                     } else if (selectedForMission.includes(item.sku)) {
-                        statusHtml = `<div class="flex items-center justify-end shadow-sm rounded-md">
-                            <button onclick="executeUpload('${safeSku}')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-l-md text-xs font-bold transition-colors z-10 flex items-center gap-1 border border-indigo-500"><i class="ph-bold ph-rocket-launch"></i> Upload!</button>
-                            <button onclick="queueMission('${safeSku}')" class="bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-500 px-2 py-1.5 rounded-r-md text-xs transition-colors border-y border-r border-slate-300"><i class="ph-bold ph-x"></i></button>
-                        </div>`;
-                    } else {
-                        statusHtml = `<button onclick="queueMission('${safeSku}')" class="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-300 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors shadow-sm">Tambah Target</button>`;
-                    }
+                        sHtml = `<div class="flex items-center justify-end"><button onclick="execAct('${sSku}', 'up')" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-l-lg text-xs font-bold"><i class="ph-bold ph-rocket-launch"></i> Upload!</button><button onclick="qAct('${sSku}', 'up')" class="bg-white hover:bg-rose-50 text-slate-500 px-2 py-1.5 rounded-r-lg border-y border-r border-slate-300"><i class="ph-bold ph-x"></i></button></div>`;
+                    } else sHtml = `<button onclick="qAct('${sSku}', 'up')" class="bg-white hover:bg-slate-50 text-slate-600 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold">Tambah Target</button>`;
                 }
-
-                html += `<td class="px-5 py-4 text-right align-top">${statusHtml}</td>`;
-                tr.innerHTML = html;
-                tbody.appendChild(tr);
+                else if (currentActiveTab === 'discontinued') {
+                    if (savedDiscData[item.sku]) {
+                        sHtml = `<button onclick="toggleAct('${sSku}', 'disc')" class="group flex items-center justify-center gap-1 bg-amber-100 hover:bg-rose-100 text-amber-700 hover:text-rose-600 border border-amber-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all w-36 ml-auto"><span class="group-hover:hidden"><i class="ph-bold ph-check-square"></i> Sudah Diproses</span><span class="hidden group-hover:inline"><i class="ph-bold ph-x"></i> Batal</span></button>`;
+                    } else if (selectedForMissionDisc.includes(item.sku)) {
+                        sHtml = `<div class="flex items-center justify-end"><button onclick="execAct('${sSku}', 'disc')" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-l-lg text-xs font-bold"><i class="ph-bold ph-archive"></i> Arsip!</button><button onclick="qAct('${sSku}', 'disc')" class="bg-white hover:bg-rose-50 text-slate-500 px-2 py-1.5 rounded-r-lg border-y border-r border-slate-300"><i class="ph-bold ph-x"></i></button></div>`;
+                    } else sHtml = `<button onclick="qAct('${sSku}', 'disc')" class="bg-white hover:bg-slate-50 text-slate-600 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold">Proses Data</button>`;
+                }
+                
+                rHtml += `<td class="px-5 py-4 text-right align-top">${sHtml}</td>`; tr.innerHTML = rHtml; tbody.appendChild(tr);
             });
         }
 
-        // --- Export to Excel Feature ---
-        function downloadExcel() {
-            const data = getFilteredData();
-            if (data.length === 0) {
-                showNotification("Kosong", "Tidak ada data untuk diekspor", true);
-                return;
-            }
-
-            let exportData = data.map(item => {
-                let row = { "Kode SKU": item.sku };
-                if (currentActiveTab !== 'only1') row["Nama Produk"] = item.name;
-
-                if (currentActiveTab === 'mismatch' || currentActiveTab === 'match') {
-                    row["Stok Data 1"] = item.stock1;
-                    row["Stok AIO"] = item.stockAio;
-                    row["Selisih"] = item.stock1 - item.stockAio;
-                } else if (currentActiveTab === 'only1') {
-                    row["Stok Data 1"] = item.stock1;
-                } else if (currentActiveTab === 'only2') {
-                    row["Stok AIO"] = item.stockAio;
-                    row["Kategori"] = item.category || "-";
-                    row["Merk"] = item.brand || "-";
-                    row["Status"] = savedUploadData[item.sku] ? "Sudah Terupload" : "Belum Terupload";
-                } else if (currentActiveTab === 'discontinued') {
-                    row["Stok Data 1"] = item.stock1;
-                    row["Stok Data 3"] = item.stock3;
-                    row["Status"] = "Discontinued";
-                }
-                return row;
-            });
-
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Laporan Data");
-
-            let tabNames = { 'mismatch': 'Selisih_Stok', 'match': 'Stok_Sama', 'only1': 'Hanya_Data_1', 'only2': 'Belum_Terupload', 'discontinued': 'Discontinued' };
-            let fileName = `Laporan_${tabNames[currentActiveTab]}_${new Date().getTime()}.xlsx`;
-            XLSX.writeFile(wb, fileName);
-            showNotification("Berhasil", "File Excel berhasil diunduh.");
+        function formatDur(ms) {
+            if(ms < 0 || isNaN(ms)) return "-";
+            const s = Math.floor(ms/1000); const m = Math.floor(s/60); const sc = s%60;
+            return m > 0 ? `${m}m ${sc}s` : `${sc} detik`;
         }
 
-        function formatDuration(ms) {
-            if (ms < 0 || isNaN(ms)) return "-";
-            const totalSeconds = Math.floor(ms / 1000);
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            if (minutes > 0) return `${minutes}m ${seconds}s`;
-            return `${seconds} detik`;
-        }
-
-        function queueMission(sku) {
-            const idx = selectedForMission.indexOf(sku);
-            if (idx === -1) {
-                selectedForMission.push(sku);
-                queueTimestamps[sku] = Date.now();
+        function qAct(sku, type) {
+            if(type === 'up') {
+                const idx = selectedForMission.indexOf(sku);
+                if(idx === -1) { selectedForMission.push(sku); queueTimestamps[sku] = Date.now(); } else { selectedForMission.splice(idx, 1); delete queueTimestamps[sku]; }
             } else {
-                selectedForMission.splice(idx, 1);
-                delete queueTimestamps[sku];
+                const idx = selectedForMissionDisc.indexOf(sku);
+                if(idx === -1) { selectedForMissionDisc.push(sku); queueTimestampsDisc[sku] = Date.now(); } else { selectedForMissionDisc.splice(idx, 1); delete queueTimestampsDisc[sku]; }
             }
             renderTable();
         }
 
-        function executeUpload(sku) {
-            const clickTime = Date.now();
-            if (queueTimestamps[sku]) {
-                const durationMs = clickTime - queueTimestamps[sku];
-                lastDurationRecord = "Durasi Upload: " + formatDuration(durationMs);
-            }
-
-            selectedForMission = selectedForMission.filter(s => s !== sku); 
-            delete queueTimestamps[sku];
-            savedUploadData[sku] = true;
-            saveToLocal();
-            
-            const count = getUploadedCount();
-            updateMissionPanel();
-            renderTable();
-            
-            if (count > 0 && count % dailyMissionTarget === 0) {
-                fireConfetti();
-                showNotification("Misi Selesai!", `Mantap! Anda mencapai target ${dailyMissionTarget} produk.`);
+        function execAct(sku, type) {
+            const now = Date.now(); let count = 0;
+            if(type === 'up') {
+                if(queueTimestamps[sku]) lastDurationRecord = "Durasi Upload: " + formatDur(now - queueTimestamps[sku]);
+                selectedForMission = selectedForMission.filter(s => s !== sku); delete queueTimestamps[sku];
+                savedUploadData[sku] = true; saveToLocal(); count = Object.keys(savedUploadData).length;
             } else {
-                fireConfettiSmall();
+                if(queueTimestampsDisc[sku]) lastDurationRecordDisc = "Durasi Arsip: " + formatDur(now - queueTimestampsDisc[sku]);
+                selectedForMissionDisc = selectedForMissionDisc.filter(s => s !== sku); delete queueTimestampsDisc[sku];
+                savedDiscData[sku] = true; saveToLocal(); count = Object.keys(savedDiscData).length;
             }
+            updateMissionPanel(); renderTable();
+            if(count > 0 && count % dailyMissionTarget === 0) { fireConfetti(); showNotification("Misi Selesai!", "Kerja bagus, target tercapai!"); } else fireConfettiSmall(type);
         }
 
-        function toggleUploadStatus(sku) {
-            if (savedUploadData[sku]) {
-                delete savedUploadData[sku];
-                saveToLocal();
-                updateMissionPanel();
-                renderTable();
-            }
+        function toggleAct(sku, type) {
+            if(type === 'up') { delete savedUploadData[sku]; saveToLocal(); } else { delete savedDiscData[sku]; saveToLocal(); }
+            updateMissionPanel(); renderTable();
         }
-        
+
         function updateMissionPanel() {
-            const panel = document.getElementById('missionPanel');
-            const slots = document.getElementById('missionSlots');
-            const textCount = document.getElementById('missionCountTxt');
-            const durationTxt = document.getElementById('uploadDurationTxt');
-            if(!slots) return;
+            if(!['only2', 'discontinued'].includes(currentActiveTab)) return;
+            const isUp = currentActiveTab === 'only2';
             
-            const count = getUploadedCount();
-            let displayCount = count % dailyMissionTarget;
-            if(count > 0 && displayCount === 0) displayCount = dailyMissionTarget; 
-
-            let slotsHtml = '';
+            const count = Object.keys(isUp ? savedUploadData : savedDiscData).length;
+            let dCount = count % dailyMissionTarget; if(count > 0 && dCount === 0) dCount = dailyMissionTarget;
+            
+            document.getElementById('missionIconBg').className = isUp ? "bg-indigo-500 p-2.5 rounded-xl text-white shadow-sm" : "bg-amber-500 p-2.5 rounded-xl text-white shadow-sm";
+            document.getElementById('missionTitle').textContent = isUp ? "Target Upload" : "Target Arsip";
+            
+            let sHtml = '';
             for(let i=0; i<dailyMissionTarget; i++) {
-                if(i < displayCount) {
-                    slotsHtml += `<div class="w-7 h-7 rounded slot-filled flex items-center justify-center"><i class="ph-fill ph-star text-yellow-400 text-sm drop-shadow-sm"></i></div>`;
-                } else {
-                    slotsHtml += `<div class="w-7 h-7 rounded bg-slate-100 border border-slate-200 flex items-center justify-center mission-slot shadow-inner"><i class="ph-fill ph-star text-slate-300 text-xs"></i></div>`;
-                }
+                if(i < dCount) sHtml += `<div class="w-8 h-8 rounded-lg slot-filled flex items-center justify-center ${isUp?'bg-indigo-500':'bg-amber-500'}"><i class="ph-fill ph-star text-yellow-300 text-lg"></i></div>`;
+                else sHtml += `<div class="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center shadow-inner"><i class="ph-fill ph-star text-slate-300 text-sm"></i></div>`;
             }
-            slots.innerHTML = slotsHtml;
-            textCount.textContent = count;
+            document.getElementById('missionSlots').innerHTML = sHtml;
             
-            if (lastDurationRecord !== "-") {
-                durationTxt.textContent = lastDurationRecord;
-                durationTxt.classList.add("text-indigo-500");
-                durationTxt.classList.remove("text-slate-400");
-            } else {
-                durationTxt.textContent = "Belum ada aktivitas";
-            }
+            const countTxt = document.getElementById('missionCountTxt');
+            countTxt.textContent = count; countTxt.className = `text-2xl font-bold ${isUp?'text-indigo-600':'text-amber-600'}`;
             
-            if(displayCount === dailyMissionTarget) {
-                panel.classList.add('border-indigo-300', 'bg-indigo-50');
-            } else {
-                panel.classList.remove('border-indigo-300', 'bg-indigo-50');
-            }
+            const dur = document.getElementById('uploadDurationTxt');
+            const rec = isUp ? lastDurationRecord : lastDurationRecordDisc;
+            if(rec !== "-") { dur.textContent = rec; dur.className = `text-[10px] font-bold tracking-wide px-2 py-0.5 rounded mt-2 border ${isUp?'bg-indigo-50 text-indigo-600 border-indigo-200':'bg-amber-50 text-amber-600 border-amber-200'}`; }
+            else { dur.textContent = "Belum ada aktivitas"; dur.className = "text-[10px] text-slate-400 font-bold tracking-wide bg-slate-50 px-2 py-0.5 rounded border border-slate-100 mt-2"; }
+            
+            const pan = document.getElementById('missionPanel');
+            pan.classList.remove('border-indigo-300', 'bg-indigo-50', 'border-amber-300', 'bg-amber-50');
+            if(dCount === dailyMissionTarget) pan.classList.add(isUp ? 'border-indigo-300' : 'border-amber-300', isUp ? 'bg-indigo-50' : 'bg-amber-50');
         }
 
-        function fireConfetti() {
-            if(typeof confetti !== 'undefined') {
-                var duration = 2.5 * 1000;
-                var animationEnd = Date.now() + duration;
-                var defaults = { startVelocity: 25, spread: 360, ticks: 60, zIndex: 100 };
+        // FX
+        function fireConfetti() { if(typeof confetti!=='undefined'){ var d=2.5*1000,e=Date.now()+d,def={startVelocity:25,spread:360,ticks:60,zIndex:100}; var i=setInterval(function(){var t=e-Date.now();if(t<=0)return clearInterval(i);var p=40*(t/d);confetti(Object.assign({},def,{particleCount:p,origin:{x:Math.random()*(0.3-0.1)+0.1,y:Math.random()-0.2}}));confetti(Object.assign({},def,{particleCount:p,origin:{x:Math.random()*(0.9-0.7)+0.7,y:Math.random()-0.2}}));},250); } }
+        function fireConfettiSmall(t) { if(typeof confetti!=='undefined') confetti({particleCount:40,spread:50,origin:{y:0.8},zIndex:100,colors:t==='up'?['#6366f1','#fbbf24','#10b981']:['#f59e0b','#fbbf24','#ef4444']}); }
 
-                var interval = setInterval(function() {
-                    var timeLeft = animationEnd - Date.now();
-                    if (timeLeft <= 0) { return clearInterval(interval); }
-                    var particleCount = 40 * (timeLeft / duration);
-                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-                }, 250);
-            }
-        }
+        function exportToExcel() {
+            const data = getFilteredData();
+            if (data.length === 0) { showNotification("Kosong", "Tidak ada data untuk diexport", true); return; }
 
-        function fireConfettiSmall() {
-             if(typeof confetti !== 'undefined') {
-                 confetti({ particleCount: 40, spread: 50, origin: { y: 0.8 }, zIndex: 100, colors: ['#6366f1', '#fbbf24', '#10b981'] });
-             }
-        }
+            const exp = data.map(i => {
+                let r = { "Kode SKU": i.sku };
+                if(currentActiveTab !== 'only1') r["Nama Produk"] = i.name;
+                
+                if(['mismatch','match'].includes(currentActiveTab)) { r["Stok Data 1"] = i.stock1; r["Stok AIO"] = i.stockAio; }
+                else if(currentActiveTab === 'only1') r["Stok Data 1"] = i.stock1;
+                else if(currentActiveTab === 'only2') { r["Stok AIO"] = i.stockAio; r["Kategori"]=i.category; r["Merk"]=i.brand; r["Status"]=savedUploadData[i.sku]?"Sudah Terupload":"Belum Terupload"; }
+                else if(currentActiveTab === 'discontinued') { r["Stok Data 1"] = i.stock1; r["Stok Data 3"] = i.stock3; r["Status"]=savedDiscData[i.sku]?"Sudah Diproses":"Belum Diproses"; }
+                return r;
+            });
 
-        function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-
-        function switchMarketplace(mp) {
-            currentMarketplace = mp;
-            const btnShopee = document.getElementById('btnShopee');
-            const btnTokped = document.getElementById('btnTokped');
-            const labelData1 = document.getElementById('labelData1');
-            const descData1 = document.getElementById('descData1');
-            const iconData1 = document.getElementById('iconData1');
-            
-            const headerBadge = document.getElementById('headerBadge');
-            const headerBadgeIcon = document.getElementById('headerBadgeIcon');
-            const processBtn = document.getElementById('processBtn');
-            
-            if (mp === 'shopee') {
-                // UI Shopee (Orange)
-                btnShopee.className = "px-8 py-2.5 rounded-lg text-sm font-bold bg-orange-500 text-white shadow-md transition-all duration-300 transform scale-100";
-                btnTokped.className = "px-8 py-2.5 rounded-lg text-sm font-medium text-slate-500 bg-white hover:bg-slate-200 transition-all duration-300";
-                
-                labelData1.textContent = "File Data 1 (Shopee)";
-                iconData1.className = "ph-fill ph-database text-orange-500 transition-colors";
-                descData1.textContent = "Mulai Baris 7 | SKU (Kol 6 atau 5) | Stok (Kol 9)";
-                
-                headerBadge.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-100 text-orange-600 text-xs font-semibold mb-4 tracking-wide shadow-sm transition-colors";
-                headerBadgeIcon.className = "ph-fill ph-sparkle text-orange-500";
-                processBtn.className = "bg-orange-500 hover:bg-orange-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-orange-200 transition-all active:scale-95 flex items-center gap-3 shrink-0";
-                
-            } else {
-                // UI Tokopedia (Emerald Green)
-                btnTokped.className = "px-8 py-2.5 rounded-lg text-sm font-bold bg-emerald-500 text-white shadow-md transition-all duration-300 transform scale-100";
-                btnShopee.className = "px-8 py-2.5 rounded-lg text-sm font-medium text-slate-500 bg-white hover:bg-slate-200 transition-all duration-300";
-                
-                labelData1.textContent = "File Data 1 (Tokopedia)";
-                iconData1.className = "ph-fill ph-database text-emerald-500 transition-colors";
-                descData1.textContent = "Mulai Baris 4 | SKU (Kol 4) | Stok (Kol 9)";
-                
-                headerBadge.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs font-semibold mb-4 tracking-wide shadow-sm transition-colors";
-                headerBadgeIcon.className = "ph-fill ph-sparkle text-emerald-500";
-                processBtn.className = "bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3.5 rounded-xl font-semibold shadow-md shadow-emerald-200 transition-all active:scale-95 flex items-center gap-3 shrink-0";
-            }
-            
-            // Sembunyikan hasil sebelumnya agar tidak tercampur saat switch
-            document.getElementById('summaryCards').classList.add('hidden');
-            document.getElementById('resultsSection').classList.add('hidden');
-            comparisonResults = { mismatch: [], match: [], only1: [], only2: [], discontinued: [] };
+            const ws = XLSX.utils.json_to_sheet(exp);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan");
+            XLSX.writeFile(wb, `Laporan_${currentActiveTab}_${currentMarketplace}.xlsx`);
+            showNotification("Berhasil", "File Excel telah didownload.");
         }
     </script>
 </body>

@@ -113,22 +113,18 @@
                 </label>
             </div>
 
-            <!-- Upload DATA AIO -->
-            <div class="clean-card p-6 relative group">
-                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-slate-800"><i class="ph-fill ph-cube text-slate-400"></i> File DATA AIO</h3>
+            <!-- Upload DATA AIO (Auto-Fetch) -->
+            <div class="clean-card p-6 relative group bg-indigo-50/30 border-indigo-100">
+                <h3 class="text-base font-semibold mb-1 flex items-center gap-2 text-indigo-800"><i class="ph-fill ph-link text-indigo-500"></i> DATA AIO (Auto-Fetch)</h3>
                 <p class="text-[11px] text-slate-500 mb-4 leading-relaxed">Mulai baris ke-2 | SKU: Kol 1 | Stok: Kol 13 | Nama: Kol 3 | Kategori: Kol 5 | Merk: Kol 7</p>
                 
-                <label for="fileAio" class="flex flex-col items-center justify-center w-full h-28 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6" id="uploadStateAio">
-                        <i class="ph-bold ph-upload-simple text-2xl text-slate-400 mb-2"></i>
-                        <p class="text-xs font-medium text-slate-600">Pilih DATA AIO</p>
+                <div class="flex flex-col items-center justify-center w-full h-28 border-2 border-indigo-200 border-dashed rounded-xl bg-white shadow-sm transition-colors">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <i class="ph-bold ph-cloud-check text-3xl text-indigo-400 mb-2"></i>
+                        <p class="text-xs font-semibold text-indigo-600">Terhubung ke Google Sheets</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Data akan ditarik otomatis saat diproses</p>
                     </div>
-                    <div id="successStateAio" class="hidden flex-col items-center justify-center w-full h-full bg-emerald-50 rounded-xl border border-emerald-100">
-                        <i class="ph-fill ph-check-circle text-2xl text-emerald-500 mb-1"></i>
-                        <p id="filenameAio" class="text-xs font-semibold text-emerald-700 text-center px-4 truncate w-full"></p>
-                    </div>
-                    <input id="fileAio" type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(this, 'Aio')" />
-                </label>
+                </div>
             </div>
 
             <!-- Upload DATA 3 -->
@@ -425,11 +421,10 @@
 
         async function mulaiKomparasi() {
             const file1 = document.getElementById('file1').files[0];
-            const fileAio = document.getElementById('fileAio').files[0];
             const file3 = document.getElementById('file3').files[0];
 
-            if (!file1 || !fileAio) {
-                showNotification("File Kurang", "Harap unggah minimal Data 1 & DATA AIO.", true);
+            if (!file1) {
+                showNotification("File Kurang", "Harap unggah Data 1 terlebih dahulu.", true);
                 return;
             }
 
@@ -441,7 +436,20 @@
             try {
                 let startRowD1 = currentMarketplace === 'shopee' ? 7 : 4;
                 const data1 = await readExcel(file1, startRowD1);
-                const dataAio = await readExcel(fileAio, 2);
+                
+                // Fetch DATA AIO from Google Sheets CSV Link
+                text.textContent = 'Mengunduh AIO...';
+                const aioUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCxz1GPm7QU9IS1yBiSjvIdNTLUsvvplOCyT_R3XH4O-LuVbHoY_bXn1LTH5lpnlolJ29BhUgEdnFm/pub?gid=1564332470&single=true&output=csv";
+                const aioRes = await fetch(aioUrl);
+                if (!aioRes.ok) throw new Error("Gagal mengunduh DATA AIO dari Google Sheets");
+                
+                const aioBuffer = await aioRes.arrayBuffer();
+                const aioWb = XLSX.read(aioBuffer, {type: 'array'});
+                const aioWs = aioWb.Sheets[aioWb.SheetNames[0]];
+                const rawDataAio = XLSX.utils.sheet_to_json(aioWs, {header: 1, defval: ""});
+                const dataAio = rawDataAio.slice(1); // Mulai baris ke-2
+
+                text.textContent = 'Memproses...';
                 const data3 = file3 ? await readExcel(file3, 2) : [];
 
                 const map1 = new Map();
@@ -513,7 +521,7 @@
                 showNotification("Sukses", "Data berhasil dianalisis!");
 
             } catch (error) {
-                console.error(error); showNotification("Error", "Gagal memproses data.", true);
+                console.error(error); showNotification("Error", "Gagal memproses data. " + error.message, true);
             } finally {
                 btn.classList.remove('opacity-80', 'cursor-not-allowed'); text.textContent = 'Mulai Analisis'; loader.classList.add('hidden');
             }
